@@ -1052,7 +1052,7 @@ scene13_followup_fb_correct: {
 
 scene14_grammar_intro: {
   type: "text",
-  text: "Grammar Run — Recap Act II\n\nYou’ll answer timed, one-line prompts. Hints appear under each prompt.\nPress Continue when ready.",
+  text: "Grammar Run — Recap Act II\n\nYou’ll answer by typing/tapping in 10 second-timed, one-line prompts. Hints appear under each prompt.\nPress Continue when ready.",
   choices: [{ text: "Continue", next: "scene14_grammar_run" }]
 },
 
@@ -1061,7 +1061,7 @@ scene14_grammar_intro: {
 scene14_grammar_run: {
   type: "conjugation-race",
   text: "Timed recap: type the exact word(s). Hints shown under each prompt.",
-  timerPer: 12,
+  timerPer: 10,
   shuffle: true,
   showAnswerOnWrong: true,
   caseInsensitive: true,
@@ -1076,20 +1076,21 @@ scene14_grammar_run: {
     low:    "scene14_grammar_retry"  // FAIL → Retry
   },
   questions: [
-    { prompt: "Complete: The pen is comparable ___ use.", answers: ["in"], hint: "(at / for / in)" },
-    { prompt: "Rewrite request: Please ___ the PK/PD + immunogenicity overlay.", answers: ["include"], hint: "(attach / include / add)" },
-    { prompt: "Deadline phrasing: Materials are due ___ Friday 5 p.m. GMT.", answers: ["by"], hint: "(on / at / by)" },
-    { prompt: "Neutral claim: Comparable efficacy and safety; ___ clinically meaningful differences.", answers: ["no"], hint: "(not / without / no)" },
-    { prompt: "Policy verb: The agency ___ us to remove superiority wording.", answers: ["told"], hint: "(said / asked / told)" },
-    { prompt: "Reported speech: Ana said ___ the device human-factors summary was to be attached.", answers: ["that"], hint: "(about / to / that)" },
-    { prompt: "Choose modal: We ___ notify the agency today if Friday is at risk.", answers: ["must"], hint: "(should / could / must)" },
-    { prompt: "Preposition: Aligned ___ Medical Affairs guidance.", answers: ["with"], hint: "(by / to / with)" },
-    { prompt: "Register: Training is available ___ request.", answers: ["on"], hint: "(upon / by / on)" },
-    { prompt: "Procurement tone: Use ___ comparability language in tenders.", answers: ["neutral"], hint: "(better / superior / neutral)" },
-    { prompt: "Reported instruction: Ana ___ us to confirm wording with Medical Affairs.", answers: ["told"], hint: "(told / told to us / said)" },
-    { prompt: "Verb form: The reviewer asked us ___ submit clearer tables this week.", answers: ["to"], hint: "(that / for / to)" }
+    { prompt: "The dossier phrasing implies similarity ___ intended use rather than mechanism.", answers: ["in"], hint: "(at / for / in)" },
+    { prompt: "The cover memo should explicitly ___ the overlay combining PK/PD and immunogenicity results.", answers: ["include"], hint: "(attach / include / add)" },
+    { prompt: "Clarify the timeline: submissions must reach the portal ___ the close of business Friday (GMT).", answers: ["by"], hint: "(on / at / by)" },
+    { prompt: "Phrase the summary neutrally: Comparable efficacy and safety, with ___ signal of clinical relevance.", answers: ["no"], hint: "(not / without / no)" },
+    { prompt: "In feedback, the agency explicitly ___ the team to delete any reference to “superiority.”", answers: ["told"], hint: "(said / asked / told)" },
+    { prompt: "During review, Ana remarked ___ the device’s HF summary needed to accompany the package.", answers: ["that"], hint: "(about / to / that)" },
+    { prompt: "There’s no flexibility here—we ___ alert the agency today if Friday’s delivery might slip.", answers: ["must"], hint: "(should / could / must)" },
+    { prompt: "The communication style should stay consistent ___ guidance issued by Medical Affairs.", answers: ["with"], hint: "(by / to / with)" },
+    { prompt: "Make sure staff know: training can be arranged ___ request rather than automatically.", answers: ["on"], hint: "(upon / by / on)" },
+    { prompt: "When drafting tenders, maintain ___ comparability language rather than evaluative terms.", answers: ["neutral"], hint: "(better / superior / neutral)" },
+    { prompt: "Ana later ___ us to verify final wording alignment with Medical Affairs before release.", answers: ["told"], hint: "(told / told to us / said)" },
+    { prompt: "The reviewer’s comment was clear: we were asked ___ provide more legible tables this week.", answers: ["to"], hint: "(that / for / to)" }
   ]
 },
+
 
 
 scene14_grammar_retry: {
@@ -1103,17 +1104,17 @@ scene15_recap_fib: {
   awardOnEnter: 15,
   text: "Act II recap — complete the summary.",
   sentence: [
-    "For the tender, messaging stays ",
+    "Act II recap — obscure edition: For the tender dossier, tone remains ",
     "__________",
-    " and makes ",
+    "; assertions make ",
     "__________",
-    " superiority claims. We will include a single ",
+    " reference to superiority. A single ",
     "__________",
-    " overlay, attach the device ",
+    " overlay will be provided, the device ",
     "__________",
-    " summary, confirm labeling alignment, and submit the ",
+    " summary appended, labeling checked for concordance, and the ",
     "__________",
-    " by the deadline."
+    " filed before the cutoff."
   ],
   blanks: [1, 3, 5, 7, 9],
   options: [
@@ -1136,6 +1137,7 @@ scene15_recap_fib: {
 
   next: "scene16_intro"
 },
+
 /* =========================
    ACT III — “Go/No-Go & Escalations”
    ========================= */
