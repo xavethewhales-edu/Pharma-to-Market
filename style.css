@@ -8,43 +8,6 @@ body {
   background-color: #000;
 }
 
-#brandLogo {
-  position: fixed;
-  right: 120px;   /* bigger = further left from the edge */
-  bottom: 24px;   /* distance from bottom */
-  width: clamp(96px, 14vw, 140px); 
-  height: auto;
-  opacity: 0.98;
-  pointer-events: none;
-  user-select: none;
-  z-index: 9999;
-}
-/* Mobile override */
-@media (max-width: 600px) {
-  #brandLogo {
-    right: 48px; /* push left from the corner on phones */
-    bottom: calc(20px + env(safe-area-inset-bottom));
-    width: clamp(72px, 22vw, 120px); /* smaller on small screens */
-  }
-
-  /* Optional: add safe space so UI doesn't collide with the logo */
-  #game-container {
-    padding-right: 88px;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
-  }
-}
-
-/* Ultra-small phones */
-@media (max-width: 360px) {
-  #brandLogo {
-    right: 36px;
-    width: clamp(64px, 24vw, 104px);
-  }
-}
-
-
-
-
 /* === Homepage layout === */
 #overlay-content {
   position: absolute;
@@ -646,270 +609,549 @@ body.scene4A1-active #scene-image {
 /* optional very subtle glow (remove if you want fully plain) */
 #brand-logo { filter: drop-shadow(0 0 18px rgba(0,255,255,.12)); }
 
-/* === White Background Theme === */
+.speech-panel[hidden]{ display:none !important; }
+.speech-hud[hidden]{   display:none !important; }
+.speech-hud   { z-index: 4000; }
+.speech-panel { z-index: 5000; }
 
-/* Whole page */
-html, body {
-  background: #ffffff !important;
-  color: #111111;  /* default text color (instructions will get brand blue separately) */
+.choice-flash { box-shadow: 0 0 0 3px rgba(0,255,200,.6) inset; transition: box-shadow .25s ease; }
+
+.mc-locked [role="button"], .mc-locked button { pointer-events:none; opacity:.55; }
+
+/* Hide speech settings UI everywhere, keep speak buttons visible */
+#speech-settings,
+#speech-settings-panel,
+#speech-settings-popover,
+#speech-hud,
+#speech-hud-panel,
+#speech-gear,
+#speech-gear-btn,
+#speech-settings-btn,
+#speech-enabled,
+#speech-enabled-checkbox,
+#speech-lang,
+#speech-tol,
+label[for="speech-enabled-checkbox"],
+.speech-settings,
+.speech-hud,
+.speech-gear,
+.speech-config,
+/* generic: any element whose id/class includes both 'speech' and 'setting' */
+[id*="speech"][id*="setting"],
+[class*="speech"][class*="setting"] {
+  display: none !important;
 }
 
-/* Game container itself */
-#game-container {
-  background: #ffffff;
+/* Make sure speak buttons are NOT hidden */
+.speech-btn,
+#mc-speak-btn,
+#scramble-speak-btn,
+#hm-mic,
+#hangman-speak-btn,
+#floating-mc-mic {
+  display: inline-flex !important;
 }
-/* =========================
-   White ↔ Blue Accessible Theme
-   ========================= */
-
-/* 0) Brand palette (adjust hex to your exact blue) */
-:root{
-  --brand-blue: #0057B7;      /* main */
-  --brand-blue-700: #004999;  /* hover/active */
-  --brand-blue-50: #EAF3FF;   /* light tint backgrounds */
-  --text-default: #111111;
-  --text-strong: #0A0A0A;
-  --border: rgba(0,0,0,0.14);
-  --shadow: 0 6px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06);
-}
-
-/* 1) Global background already set to white; keep default text dark */
-html, body {
-  background: #ffffff !important;
-  color: var(--text-default);
-}
-
-/* 2) Instructional scene text (switch from white → blue) */
-#scene-text, .scene-text, .instructions {
-  color: var(--brand-blue);
-  text-shadow: none !important;   /* remove any glow/blur from the old dark theme */
+/* Hide any "Test Mic" controls */
+#speech-test,
+#speech-test-btn,
+#test-mic,
+#mic-test,
+.speech-test,
+.mic-test,
+/* generic catch-alls */
+[id*="speech"][id*="test"],
+[class*="speech"][class*="test"],
+[id*="mic"][id*="test"],
+[class*="mic"][class*="test"] {
+  display: none !important;
 }
 
-/* If text sits over busy images, add class="scene-text card" to get a readable card */
-.scene-text.card, #scene-text.card, .instructions.card {
-  background: rgba(255,255,255,0.95);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  border-radius: 12px;
-  padding: 14px 16px;
+/* Keep actual in-scene Speak buttons visible */
+.speech-btn,
+#mc-speak-btn,
+#scramble-speak-btn,
+#hm-mic,
+#hangman-speak-btn,
+#floating-mc-mic {
+  display: inline-flex !important;
 }
 
-/* 3) BUTTONS — kill blur-on-hover and align with brand */
-/* Target your common button locations/classes */
-.decision-buttons button,
-.choices button,
-#scene6-ui button,
-#sceneFillInTheBlank button,
-#sentence-scramble button,
-.button-group button,
-.choice-btn,
-.decision-btn,
-.btn {
-  appearance: none;
-  background: #ffffff;
-  color: var(--brand-blue);
-  border: 2px solid var(--brand-blue);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  /* remove any blur/filters from previous theme */
-  filter: none !important;
-  backdrop-filter: none !important;
-  text-shadow: none !important;
-  /* smooth but subtle motion */
-  transition: transform .06s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+/* A-State — synthwave upgrade for the Continue button */
+.continue-button,
+#continue-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate; /* keeps glow effect nicely clipped */
 }
 
-.decision-buttons button:hover,
-.choices button:hover,
-#scene6-ui button:hover,
-#sceneFillInTheBlank button:hover,
-#sentence-scramble button:hover,
-.button-group button:hover,
-.choice-btn:hover,
-.decision-btn:hover,
-.btn:hover {
-  background: var(--brand-blue);
-  color: #ffffff;
-  border-color: var(--brand-blue);
-  transform: translateY(-1px);
-  filter: none !important;             /* ensure NO blur on hover */
-  backdrop-filter: none !important;
+/* soft neon outline pulse */
+.continue-button::before,
+#continue-button::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 180deg,
+    rgba(255, 90, 241, 0.0),
+    rgba(255, 90, 241, 0.6),
+    rgba(63, 140, 255, 0.0),
+    rgba(63, 140, 255, 0.7),
+    rgba(255, 90, 241, 0.0)
+  );
+  opacity: 0.0;
+  z-index: -1;
+  transition: opacity 180ms ease;
+  pointer-events: none;
 }
 
-.decision-buttons button:active,
-.choices button:active,
-#scene6-ui button:active,
-#sceneFillInTheBlank button:active,
-#sentence-scramble button:active,
-.button-group button:active,
-.choice-btn:active,
-.decision-btn:active,
-.btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+/* subtle sheen across the top */
+.continue-button::after,
+#continue-button::after {
+  content: "";
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  top: 0;
+  height: 55%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0.02)
+  );
+  mix-blend-mode: screen;
+  opacity: 0.0;
+  transform: translateX(-30%);
+  transition:
+    opacity 200ms ease,
+    transform 600ms ease;
+  pointer-events: none;
 }
 
-.decision-buttons button:focus-visible,
-.choices button:focus-visible,
-#scene6-ui button:focus-visible,
-#sceneFillInTheBlank button:focus-visible,
-#sentence-scramble button:focus-visible,
-.button-group button:focus-visible,
-.choice-btn:focus-visible,
-.decision-btn:focus-visible,
-.btn:focus-visible {
-  outline: 3px solid var(--brand-blue-50);
-  outline-offset: 2px;
+/* hover: bring the glow + sheen in */
+.continue-button:hover::before,
+#continue-button:hover::before {
+  opacity: 0.9;
 }
 
-/* Optional alt style: a fully filled primary button (use a class if you want specific CTAs) */
-.btn-primary {
-  background: var(--brand-blue);
-  color: #fff;
-  border-color: var(--brand-blue);
-}
-.btn-primary:hover { background: var(--brand-blue-700); }
-
-/* 4) Choice containers spacing (readability) */
-.decision-buttons, .choices, .choices-container, .decision-group {
-  display: grid;
-  gap: 12px;
+.continue-button:hover::after,
+#continue-button:hover::after {
+  opacity: 1.0;
+  transform: translateX(10%);
 }
 
-/* 5) Challenge UI (readability-first) */
+/* A-State — 80s synthwave CORRECT / WRONG feedback upgrade */
 
-/* Debug/challenge info chip (you currently had dark); switch to light */
-#challenge-info {
-  background: var(--brand-blue-50) !important;
-  color: var(--brand-blue) !important;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+/* base feedback chip */
+#scramble-feedback,
+#fill-feedback,
+#feedback {
+  position: relative;
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-/* Scramble tiles on white with gentle borders */
-.scramble-sentence, #sentence-scramble .tile, #sentence-scramble .word {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: var(--text-strong);
+/* ---------- CORRECT: neon systems-online blast ---------- */
+
+#scramble-feedback.correct,
+#fill-feedback.correct,
+#feedback.correct {
+  color: #9affff;
+  background: rgba(20, 40, 60, 0.9);
+  border: 1px solid rgba(154, 255, 255, 0.7);
+  text-shadow:
+    0 0 4px rgba(154, 255, 255, 0.7),
+    0 0 12px rgba(154, 255, 255, 0.7);
+  box-shadow:
+    0 0 10px rgba(154, 255, 255, 0.5),
+    0 0 32px rgba(0, 220, 200, 0.6);
+  animation:
+    astateCorrectPulse 420ms ease-out,
+    astateCorrectGlow 1600ms ease-out 420ms forwards;
 }
 
-/* Drop zones look active and clear */
-#sentence-scramble .dropzone, #sentence-scramble .target {
-  background: var(--brand-blue-50);
-  border: 2px dashed var(--brand-blue);
-  border-radius: 10px;
+/* expanding ring behind the text */
+#scramble-feedback.correct::before,
+#fill-feedback.correct::before,
+#feedback.correct::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 1px solid rgba(154, 255, 255, 0.8);
+  box-shadow: 0 0 20px rgba(154, 255, 255, 0.7);
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+  animation: astateCorrectRing 420ms ease-out;
 }
 
-/* Fill-in-the-blank inputs */
-#sceneFillInTheBlank input[type="text"],
-#sceneFillInTheBlank select {
-  background: #fff;
-  color: var(--text-strong);
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
-}
-#sceneFillInTheBlank input[type="text"]:focus,
-#sceneFillInTheBlank select:focus {
-  border-color: var(--brand-blue);
-  outline: 3px solid var(--brand-blue-50);
-}
-
-/* 6) Scene images remain clean on white */
-#scene-image img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  background: #fff;
-  border-radius: 8px;
-}
-
-/* 7) Keep any intentionally dark “read-only email” boxes, if you use them, for contrast.
-   (Remove this block if you prefer to lighten them too.) */
-.email-readonly, .email-preview, .email-box {
-  background: #0F1222;      /* dark surface for neon/text contrast */
-  color: #FFFFFF;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 12px;
-}
-
-/* 8) Mobile polish so buttons/text don’t collide with the brand logo */
-@media (max-width: 600px) {
-  #game-container {
-    padding-right: 88px;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+@keyframes astateCorrectPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
-/* Pinkish-magenta accent for scramble tiles */
-:root{
-  --accent-pink: #E91E63;     /* main (pink/magenta) */
-  --accent-pink-700: #C2185B; /* hover/active */
-  --accent-pink-50: #FCE4EC;  /* light tint for dropzones */
+
+@keyframes astateCorrectRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
 }
 
-/* Common tile classes used around the scramble feature */
-#scramble-words .scramble-word,
-#sentence-scramble .scramble-word,
-#sentence-scramble .word,
-#sentence-scramble .tile {
-  background: var(--accent-pink) !important;  /* override any old yellow */
-  color: #fff !important;
-  border: 1px solid var(--accent-pink-700);
-  border-radius: 10px;
-  padding: 6px 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+@keyframes astateCorrectGlow {
+  0% {
+    box-shadow:
+      0 0 10px rgba(154, 255, 255, 0.5),
+      0 0 32px rgba(0, 220, 200, 0.6);
+  }
+  100% {
+    box-shadow:
+      0 0 4px rgba(154, 255, 255, 0.3),
+      0 0 12px rgba(0, 220, 200, 0.4);
+  }
 }
 
-/* Hover/active feedback */
-#scramble-words .scramble-word:hover,
-#sentence-scramble .scramble-word:hover,
-#sentence-scramble .word:hover,
-#sentence-scramble .tile:hover {
-  background: var(--accent-pink-700) !important;
+/* ---------- WRONG: glitchy error ping ---------- */
+
+#scramble-feedback.incorrect,
+#fill-feedback.incorrect,
+#feedback.incorrect {
+  color: #ff96b8;
+  background: rgba(40, 16, 32, 0.9);
+  border: 1px solid rgba(255, 150, 184, 0.7);
+  text-shadow:
+    0 0 4px rgba(255, 150, 184, 0.7),
+    -2px 0 8px rgba(255, 0, 120, 0.7);
+  box-shadow:
+    0 0 10px rgba(255, 80, 140, 0.5),
+    0 0 28px rgba(255, 0, 120, 0.5);
+  animation: astateIncorrectGlitch 260ms ease-out;
 }
 
-#scramble-words .scramble-word:active,
-#sentence-scramble .scramble-word:active,
-#sentence-scramble .word:active,
-#sentence-scramble .tile:active {
-  transform: translateY(1px);
+/* little horizontal “scan” bar */
+#scramble-feedback.incorrect::before,
+#fill-feedback.incorrect::before,
+#feedback.incorrect::before {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: 45%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 150, 184, 0.8),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+  animation: astateIncorrectScan 260ms ease-out;
 }
 
-/* Make targets/dropzones lightly tinted to match */
-#scramble-targets .dropzone,
-#sentence-scramble .dropzone,
-#sentence-scramble .target {
-  background: var(--accent-pink-50) !important;
-  border: 2px dashed var(--accent-pink);
-  border-radius: 10px;
+@keyframes astateIncorrectGlitch {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-3px); }
+  40%  { transform: translateX(3px); }
+  60%  { transform: translateX(-2px); }
+  80%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
 }
 
-:root{
-  --accent-pink: #E91E63;
-  --accent-pink-700: #C2185B;
-  --accent-pink-50: #FCE4EC;
-}
-
-/* Scramble instruction badge */
-#sentence-scramble .scramble-instructions,
-#sentence-scramble .instructions,
-#sentence-scramble h3.scramble-title,
-#sentence-scramble .header {
-  display: inline-block;
-  color: var(--accent-pink-700);
-  background: var(--accent-pink-50);
-  border: 1px solid var(--accent-pink);
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-weight: 800;
-  font-size: 1.02rem;
-  margin-bottom: 8px;
+@keyframes astateIncorrectScan {
+  0%   { opacity: 0.0; transform: translateX(-10%); }
+  40%  { opacity: 1.0; transform: translateX(0); }
+  100% { opacity: 0.0; transform: translateX(10%); }
 }
 
 
+/* ===========================
+   A-State — noticeable CORRECT / WRONG FX
+   =========================== */
+
+/* Smooth base for the card */
+#game-container {
+  position: relative;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+/* Shared top HUD bar (inactive by default) */
+#game-container::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* -------------------
+   CORRECT: cyan / teal boost
+   ------------------- */
+
+#game-container:has(#scramble-feedback.correct,
+                    #fill-feedback.correct,
+                    #feedback.correct) {
+  transform: scale(1.01);
+  box-shadow:
+    0 0 40px rgba(0, 255, 200, 0.45),
+    0 0 80px rgba(80, 180, 255, 0.35);
+  filter: saturate(1.05);
+}
+
+/* top HUD bar for correct */
+#game-container:has(#scramble-feedback.correct,
+                    #fill-feedback.correct,
+                    #feedback.correct)::before {
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 200, 0.0),
+    rgba(0, 255, 200, 0.9),
+    rgba(80, 160, 255, 0.9),
+    rgba(0, 255, 200, 0.0)
+  );
+  animation: astateHudSweepCorrect 900ms ease-out;
+}
+
+/* optional: make the correct label itself pop a bit */
+#scramble-feedback.correct,
+#fill-feedback.correct,
+#feedback.correct {
+  color: #9affff;
+  text-shadow:
+    0 0 6px rgba(154, 255, 255, 0.9),
+    0 0 16px rgba(0, 200, 200, 0.7);
+}
+
+/* -------------------
+   INCORRECT: magenta glitch
+   ------------------- */
+
+#game-container:has(#scramble-feedback.incorrect,
+                    #fill-feedback.incorrect,
+                    #feedback.incorrect) {
+  animation: astateContainerShake 260ms ease-out;
+  box-shadow:
+    0 0 28px rgba(255, 60, 140, 0.6),
+    0 0 60px rgba(255, 0, 140, 0.35);
+}
+
+/* top HUD bar for wrong */
+#game-container:has(#scramble-feedback.incorrect,
+                    #fill-feedback.incorrect,
+                    #feedback.incorrect)::before {
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 0, 128, 0.0),
+    rgba(255, 120, 184, 0.95),
+    rgba(255, 0, 128, 0.95),
+    rgba(255, 0, 128, 0.0)
+  );
+  animation: astateHudSweepWrong 260ms ease-out;
+}
+
+/* -------------------
+   Keyframes
+   ------------------- */
+
+@keyframes astateHudSweepCorrect {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  30% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(10%);
+    opacity: 0;
+  }
+}
+
+@keyframes astateHudSweepWrong {
+  0% {
+    transform: translateX(-10%);
+    opacity: 0;
+  }
+  40% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(10%);
+    opacity: 0;
+  }
+}
+
+@keyframes astateContainerShake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-4px); }
+  40%  { transform: translateX(4px); }
+  60%  { transform: translateX(-3px); }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+/* A-State — scene transition (monitor refresh) */
+
+/* ================================
+   A-State — pharma scene intro
+   Elements enter in sequence
+   ================================ */
+
+/* Panel itself: small, clean appear */
+#game-container.scene-enter {
+  animation: pharmaPanelAppear 200ms ease-out;
+}
+
+@keyframes pharmaPanelAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(2px) brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0) brightness(1);
+  }
+}
+
+/* 1) Scene image: drops in first */
+#game-container.scene-enter .scene-image,
+#game-container.scene-enter #scene-image {
+  animation: pharmaImageIn 260ms ease-out both;
+}
+
+@keyframes pharmaImageIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+    filter: blur(3px) saturate(1.1);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+    filter: blur(0.7px) saturate(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0) saturate(1);
+  }
+}
+
+/* 2) Main text block: fades in with a diagnostic "scan" */
+#game-container.scene-enter .scene-text,
+#game-container.scene-enter #scene-text,
+#game-container.scene-enter .scene-body {
+  animation: pharmaTextIn 280ms ease-out 70ms both;
+}
+
+@keyframes pharmaTextIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+    letter-spacing: 0.18em;
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.08em;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* 3) Challenge / interaction area (scramble / fill / email) */
+#game-container.scene-enter #sentence-scramble,
+#game-container.scene-enter .scramble-container,
+#game-container.scene-enter .fill-in-container,
+#game-container.scene-enter .email-challenge,
+#game-container.scene-enter #interaction-area {
+  animation: pharmaWidgetIn 260ms ease-out 110ms both;
+}
+
+@keyframes pharmaWidgetIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* 4) Choices: pills appear one by one like options on a console */
+#game-container.scene-enter #choices-container button {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: pharmaChoiceIn 220ms ease-out both;
+}
+
+/* stagger the choices with nth-child */
+#game-container.scene-enter #choices-container button:nth-child(1) {
+  animation-delay: 120ms;
+}
+#game-container.scene-enter #choices-container button:nth-child(2) {
+  animation-delay: 170ms;
+}
+#game-container.scene-enter #choices-container button:nth-child(3) {
+  animation-delay: 220ms;
+}
+#game-container.scene-enter #choices-container button:nth-child(4) {
+  animation-delay: 270ms;
+}
+
+@keyframes pharmaChoiceIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(1px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}

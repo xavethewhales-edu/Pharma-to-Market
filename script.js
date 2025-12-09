@@ -465,6 +465,26 @@ const __XAVETHEWHALES_SIGNATURE__ = Object.freeze({
 // Alias so existing code using SCORM.* keeps working
 window.SCORM = window.SCORM || window.__scorm;
 
+// --- Global home toggles (single source of truth) ---
+window.showHome = function showHome() {
+  const overlay = document.getElementById('overlay-content');
+  const game    = document.getElementById('game-container');
+  if (game)    game.style.display = 'none';
+  if (overlay) overlay.style.display = ''; // let CSS handle layout
+};
+
+window.hideHome = function hideHome() {
+  const overlay = document.getElementById('overlay-content');
+  const game    = document.getElementById('game-container');
+  if (overlay) overlay.style.display = 'none';
+  if (game)    game.style.display = 'block';
+};
+
+
+
+
+
+
 
 
 const scenes = {
@@ -475,6 +495,7 @@ const scenes = {
 scene1: {
   type: "text",
   text: "Tap Continue to begin.",   // minimal stub to satisfy validator
+  forceSpeechUI: true,  
   image: "images/1.png",
   awardOnEnter: 2,
   render: function (container) {
@@ -528,6 +549,7 @@ scene1: {
 // S1 — DASHBOARD (instructional text; sets context fast)
 scene2_dashboard: {
   type: "text",
+  forceSpeechUI: true,  
   awardOnEnter: 3,
   text: " ", // validator requirement
   render: function (container) {
@@ -581,6 +603,7 @@ scene2_dashboard: {
 
 scene2: {
   type: "text",
+  forceSpeechUI: true,  
   text: " ", // required by validator
   render: function (container) {
     container.innerHTML = `
@@ -635,6 +658,8 @@ scene2: {
 // S3 — PERSPECTIVE CHOICE (instructional text only; branches rejoin)
 scene3: {
   type: "text",
+  forceSpeechUI: true,  
+  speechMenu: true,
   text:
 "Choose which perspective to address first.",
   choices: [
@@ -646,8 +671,12 @@ scene3: {
 // S4A — MICRO EMAIL (Medical path): one body line in chunks
 scene4_med: {
   type: "scramble",
+
+disableSpeech: true,
+
   // scene4_med
 awardOnEnter: 5,
+
 
   text: "Arrange the internal email lines in the correct order.",
   scramble: [
@@ -895,6 +924,7 @@ scene9_quiz1_fb_correct: {
 /* HANGMAN — no retry, no Hub; always proceeds to remedial lesson */
 scene9a_hangman_tender: {
   type: "hangman",
+  noSpeechUI: true,
   hint: "Hospital purchasing process where suppliers bid under specific terms.",
   target: "tender",
   maxWrong: 6,
@@ -912,6 +942,7 @@ scene9a_remedial_tender: {
 
 scene9b_hangman_comparability: {
   type: "hangman",
+  noSpeechUI: true,
   hint: "Regulatory concept: similar efficacy/safety; no clinically meaningful differences.",
   target: "comparability",
   maxWrong: 6,
@@ -929,6 +960,7 @@ scene9b_remedial_comparability: {
 
 scene9c_hangman_attestation: {
   type: "hangman",
+  noSpeechUI: true,
   hint: "A formal written statement confirming something is true (e.g., supply).",
   target: "attestation",
   maxWrong: 6,
@@ -1393,6 +1425,8 @@ scene23_live_intro: {
 /* -------- 24/27 — LIVE CALL: Claims stance -------- */
 scene24_live1: {
   type: "interaction-audio-mc",
+    disableSpeech: true,
+
   text: "Reviewer speaks; confirm claims stance (timer starts after audio).",
   audio: "audio/7.mp3",                    // Reviewer prompt
   options: ["audio/8.mp3","audio/9.mp3","audio/10.mp3"], // Stacy replies
@@ -1402,6 +1436,8 @@ scene24_live1: {
   suppressHub: true,
   endings: { wrong: "scene24_live1_wrong", timeout: "scene24_live1_timeout" },
   next: "scene25_live2"
+  
+  
 },
 scene24_live1_wrong: {
   type: "text",
@@ -1419,6 +1455,8 @@ scene24_live1_timeout: {
 /* -------- 25/27 — LIVE CALL: Timing + portal constraint -------- */
 scene25_live2: {
   type: "interaction-audio-mc",
+    disableSpeech: true,
+
   text: "Reviewer speaks; confirm timing & 10 MB single-PDF limit (timer starts after audio).",
   audio: "audio/11.mp3",                   // Reviewer prompt
   options: ["audio/12.mp3","audio/13.mp3","audio/14.mp3"], // Stacy replies
@@ -1445,6 +1483,8 @@ scene25_live2_timeout: {
 /* -------- 26/27 — LIVE CALL: HF contingency + risky phrase request -------- */
 scene26_live3: {
   type: "interaction-audio-mc",
+    disableSpeech: true,
+
   text: "Reviewer speaks; handle HF contingency & the ‘easy to use’ request (timer starts after audio).",
   audio: "audio/15.mp3",                   // Reviewer prompt
   options: ["audio/16.mp3","audio/17.mp3","audio/18.mp3"], // Stacy replies
@@ -1471,6 +1511,8 @@ scene26_live3_timeout: {
 /* -------- 27/27 — LIVE CALL: One-sentence commitment -------- */
 scene27_live4: {
   type: "interaction-audio-mc",
+    disableSpeech: true,
+
   text: "Reviewer speaks; give a one-sentence commitment (timer starts after audio).",
   audio: "audio/19.mp3",                   // Reviewer prompt
   options: ["audio/20.mp3","audio/21.mp3","audio/22.mp3"], // Stacy replies
@@ -1518,6 +1560,7 @@ scene29_intro: {
 /* ---- HANGMAN (no retries, always proceeds to remedial) ---- */
 scene29a_hangman_excursion: {
   type: "hangman",
+  noSpeechUI: true,
   hint: "Cold-chain: a brief temperature deviation from the qualified range.",
   target: "excursion",
   maxWrong: 6,
@@ -1648,12 +1691,16 @@ scene34_video_intro: {
 /* ------- V1: Pricing & promotional neutrality ------- */
 /* Prompt video */
 /* ========= V1 — Pricing & neutrality ========= */
+/* ========= V1 — Pricing neutrality ========= */
 scene35_v1: {
   type: "video-choice",
   videoSrc: "videos/1.mp4",         // Reviewer prompt
   timer: 14,
   shuffleOptions: true,             // <-- randomize order
   timeoutNext: "scene35_timeout",   // <-- dedicated timeout
+  // 🔑 Used by the speech hook to tag the correct button by text match
+  speechRightText:
+    "We’ll keep pricing strictly within the procurement forms and maintain a neutral narrative—no comparative or superiority framing in any text outside those forms.",
   choices: [
     // WRONG 1 → videos/2.mp4
     {
@@ -1672,6 +1719,7 @@ scene35_v1: {
     }
   ]
 },
+
 scene35_wrong1: { type: "video", videoSrc: "videos/2.mp4", next: "scene35_wrong1_text" },
 scene35_wrong1_text: {
   type: "text",
@@ -1700,6 +1748,9 @@ scene36_v2: {
   timer: 14,
   shuffleOptions: true,
   timeoutNext: "scene36_timeout",
+  // 🔑 Speech tagging hint
+  speechRightText:
+    "We’ll mirror the label and our validated SOPs for serialization and recall traceability without implying performance advantages; statements stay scope-accurate and evidence-based.",
   choices: [
     // WRONG 1 → videos/6.mp4
     {
@@ -1746,6 +1797,9 @@ scene37_v3: {
   timer: 14,
   shuffleOptions: true,
   timeoutNext: "scene37_timeout",
+  // 🔑 Speech tagging hint
+  speechRightText:
+    "We’ll notify the hospital pharmacy immediately within the SOP window and, where required, the competent authority; a preliminary notice precedes the RCA/CAPA, which follows per procedure.",
   choices: [
     // CORRECT → proceeds to V4
     {
@@ -1792,6 +1846,9 @@ scene38_v4: {
   timer: 14,
   shuffleOptions: true,
   timeoutNext: "scene38_timeout",
+  // 🔑 Speech tagging hint
+  speechRightText:
+    "We’ll rely on a documented lawful basis under a DPA, limit access to the minimum necessary for scheduling, and avoid repurposing any personal data beyond training logistics.",
   choices: [
     // WRONG 1 → videos/14.mp4
     {
@@ -1846,6 +1903,7 @@ scene40_v4_wrap: {
   choices: [{ text: "Continue", next: "scene41_email" }]
 },
 
+
 /* ===== WRAP-UP — Email to Instructor (engine-native) ===== */
 
 /* If your current final video outcome scene doesn't point here yet,
@@ -1855,7 +1913,7 @@ scene41_email: {
   type: "email",
   awardOnEnter: 2,
   text: "Final task — send a short reflection to your instructor (what happened, why it mattered, and what you’d do next time). Aim for ~180–250 words.",
-  teacherEmail: "soniaalvarez@atribord.com",
+  teacherEmail: "xavier.benitz@gmail.com",
   emailSubject: "Pharma to Market — Launch Review Reflection (Act I–IV)",
   emailBody: "",
   next: "email_sent_confirm"
@@ -1956,13 +2014,28 @@ window.startFreshAttempt = function(firstSceneId = "scene1") {
     }
 
     // Do NOT reconcile/publish here—wait until gameplay
-    if (typeof hideHome === "function") hideHome();
-    if (typeof window.loadScene === "function") window.loadScene(firstSceneId);
+// Do NOT reconcile/publish here—wait until gameplay
+window.hideHome();
+if (typeof window.loadScene === "function") {
+  window.loadScene(firstSceneId);
+}
+ else {
+  console.warn("[FreshAttempt] loadScene not ready yet.");
+}
+
   } catch (e) {
     console.warn("[FreshAttempt] reset failed:", e);
     // As a fallback, still try to launch
-    if (typeof hideHome === "function") hideHome();
-    if (typeof window.loadScene === "function") window.loadScene(firstSceneId);
+// Do NOT reconcile/publish here—wait until gameplay
+window.hideHome();         
+try { updateSpeechUIForScene(id); } catch(_) {}
+                    // always hide overlay
+if (typeof window.loadScene === "function") {
+  window.loadScene(firstSceneId);
+} else {
+  console.warn("[FreshAttempt] loadScene not ready yet.");
+}
+
   }
 };
 
@@ -3091,6 +3164,7 @@ btn.onclick = () => {
       const orig = window.loadScene;
       window.loadScene = function (id) {
         const r = orig.apply(this, arguments);
+        try { updateSpeechUIForScene(id); } catch(_) {}
         const saved = readSave() || {};
         saved.lastScene = id;
         if (window.progress) {
@@ -3279,6 +3353,7 @@ btn.onclick = () => {
 
     window.loadScene = function (id) {
       const result = original.apply(this, arguments);
+      try { updateSpeechUIForScene(id); } catch(_) {}
 
       // Persist lastScene + flags/unlocked if available
       const saved = readSave() || {};
@@ -3421,6 +3496,103 @@ btn.onclick = () => {
   window.validateScenes();
 })();
 
+;(()=>{ // === Choice Target Stamper — Safe v2 ===
+  if (window.__ctsInstalled) return; 
+  window.__ctsInstalled = true;
+
+  // Helpers
+  const norm = s => String(s||'').toLowerCase()
+    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+    .replace(/\s+/g,' ').trim();
+
+  function getScene(id){
+    const scs = window.scenes || {};
+    return Array.isArray(scs) ? scs.find(x=>x && x.id===id) : scs[id];
+  }
+
+  function stampTargets(){
+    try{
+      const host = document.querySelector('#choices-container');
+      if (!host) return;
+      const style = window.getComputedStyle(host);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
+
+      const btns = host.querySelectorAll('.choice');
+      if (!btns.length) return;
+
+      const id = window.currentSceneId;
+      const sc = getScene(id);
+      if (!sc) return;
+
+      // Build a text → next model from the scene’s choices
+      const list = Array.isArray(sc.choices) ? sc.choices : [];
+      const model = list.map((c, i)=>({
+        idx:i,
+        head:norm(String(c.text||'').slice(0,120)),
+        next:String(c.next||'')
+      }));
+
+      // Ensure weak map
+      if (!(window.__choiceNextMap instanceof WeakMap)) {
+        window.__choiceNextMap = new WeakMap();
+      }
+
+      btns.forEach((b, uiIdx) => {
+        let target = b.getAttribute('data-next') || '';
+        if (target) { window.__choiceNextMap.set(b, target); return; }
+
+        // 1) originIndex → scene.choices[originIndex].next
+        const oiAttr = b.getAttribute('data-originIndex') || b.getAttribute('data-originindex');
+        const oi = Number(oiAttr);
+        if (Number.isFinite(oi) && model[oi] && model[oi].next) {
+          target = model[oi].next;
+        }
+
+        // 2) fallback: text-head match
+        if (!target) {
+          const head = norm(String(b.textContent||'').slice(0,120));
+          const hit = model.find(m => m.head && (head.startsWith(m.head) || m.head.startsWith(head) || head.includes(m.head) || m.head.includes(head)));
+          if (hit && hit.next) target = hit.next;
+        }
+
+        // 3) last ditch: match by UI index if shuffle OFF (won’t fire if shuffled)
+        if (!target && list[uiIdx] && list[uiIdx].next) {
+          target = list[uiIdx].next;
+        }
+
+        if (target) {
+          b.setAttribute('data-next', target);
+          window.__choiceNextMap.set(b, target);
+        }
+      });
+    } catch(e){
+      console.warn('[CTS] stamp error:', e);
+    }
+  }
+
+  // Respond to loaders that announce readiness
+  document.addEventListener('choices-ready', () => {
+    // small delay lets buttons finish painting
+    setTimeout(stampTargets, 30);
+  }, { passive:true });
+
+  // Also watch DOM changes inside game container (covers loaders that don’t emit)
+  const gc = document.getElementById('game-container');
+  if (gc) {
+    const mo = new MutationObserver((muts)=>{
+      // Only care when choice buttons appear
+      const relevant = muts.some(m =>
+        [...m.addedNodes||[]].some(n =>
+          (n.nodeType===1) && (n.matches?.('#choices-container,.choice') || n.querySelector?.('.choice'))
+        )
+      );
+      if (relevant) setTimeout(stampTargets, 30);
+    });
+    mo.observe(gc, { childList:true, subtree:true });
+    window.__ctsCleanup = ()=> mo.disconnect();
+  }
+})();
+
 
 // === Game start setup ===
 let currentSceneId = "scene1";
@@ -3428,11 +3600,16 @@ let currentSceneId = "scene1";
 function startGame() {
   const overlay = document.getElementById("overlay-content");
   const gameContainer = document.getElementById("game-container");
+
   if (overlay) overlay.style.display = "none";
   if (gameContainer) gameContainer.style.display = "block";
-  if (window.BGM) window.BGM.pauseForGameStart(); // NEW: stop homepage music when game starts
+
+  if (window.BGM) window.BGM.pauseForGameStart();
+
+  // loadScene will decide if speech UI is shown
   loadScene(currentSceneId);
 }
+
 
 // === Utilities ===
 function shuffleArray(arr) {
@@ -3446,6 +3623,26 @@ function shuffleArray(arr) {
 
 function arraysEqual(a, b) {
   return a.length === b.length && a.every((val, i) => val === b[i]);
+}
+
+function prepAudioElement(audioEl) {
+  if (!audioEl || audioEl.__preppedAudio) return;
+  audioEl.__preppedAudio = true;
+  try {
+    if (!audioEl.preload || audioEl.preload === 'none') {
+      audioEl.preload = 'auto';
+    }
+  } catch (_) {}
+  try { audioEl.load(); } catch (_) {}
+  let unlocked = false;
+  const markUnlocked = () => { unlocked = true; };
+  audioEl.addEventListener('play', markUnlocked, { passive: true });
+  audioEl.addEventListener('ended', markUnlocked, { passive: true });
+  audioEl.addEventListener('seeking', () => {
+    if (!unlocked) {
+      try { audioEl.currentTime = 0; } catch (_) {}
+    }
+  }, { passive: true });
 }
 // Helper to clean words of problematic Unicode characters
 function cleanWord(word) {
@@ -3556,7 +3753,64 @@ function cleanScenesData(scenesObj) {
 })();
 
 
+// --- SAFETY SHIM: tolerate accidental Element passed to querySelector ---
+(function(){
+  if (window.__qsShimInstalled) return; window.__qsShimInstalled = true;
+  const _qs = Document.prototype.querySelector;
+  Document.prototype.querySelector = function(sel){
+    // If someone passed an Element instead of a selector, just return it.
+    if (sel && typeof sel === 'object' && sel.nodeType === 1) return sel;
+    if (typeof sel !== 'string') return null;
+    try { return _qs.call(this, sel); } catch(e) { console.warn('[qs-shim]', e?.message||e); return null; }
+  };
+})();
+// --- CHOICE TARGET STAMPER (scene.choices → button.dataset.next) ---
+function stampChoiceNextTargetsFromScene(scene, host){
+  try {
+    if (!scene || !host) return;
+    const btns = host.querySelectorAll && host.querySelectorAll('.choice');
+    if (!btns || !btns.length) return;
+    const model = Array.isArray(scene.choices) ? scene.choices.map(c=>({
+      head: String(c.text||'').trim().slice(0,160).toLowerCase(),
+      next: c.next || ''
+    })) : [];
 
+    btns.forEach((b) => {
+      if (!b) return;
+      // If already stamped, keep it.
+      if (b.getAttribute('data-next')) return;
+
+      const txt  = (b.textContent||'').trim();
+      const head = txt.slice(0,160).toLowerCase();
+
+      // 1) text-head match (robust, works with shuffle)
+      const hit = model.find(m =>
+        m.head === head || head.startsWith(m.head) || m.head.startsWith(head) || head.includes(m.head) || m.head.includes(head)
+      );
+
+      const target = (hit && hit.next) ? hit.next : '';
+      if (target) {
+        b.setAttribute('data-next', target);
+        try {
+          // keep weak map compatibility if your speech hook uses it
+          window.__choiceNextMap = window.__choiceNextMap || new WeakMap();
+          window.__choiceNextMap.set(b, target);
+        } catch(_) {}
+      }
+    });
+  } catch(_) {}
+}
+
+function playSceneTransition() {
+  const container = document.getElementById('game-container');
+  if (!container) return;
+
+  // remove class to restart animation if it's already there
+  container.classList.remove('scene-enter');
+  // force reflow so the browser sees it as "re-added"
+  void container.offsetWidth;
+  container.classList.add('scene-enter');
+}
 
 
 // === Main scene loader ===
@@ -3564,6 +3818,7 @@ function loadScene(id) {
   console.log(`\n>>> loadScene called with ID: "${id}"`);
   const scene = scenes[id];
   // Mark as 'incomplete' on first playable scene of the course
+    playSceneTransition(); // <- add this line
 try {
   if (SCORM.init()) {
     const status = SCORM.get && SCORM.get("cmi.core.lesson_status");
@@ -3580,6 +3835,72 @@ try {
     return;
   }
   currentSceneId = id;
+    // === Per-scene speech gating ===
+      currentSceneId = id;
+
+  // === Per-scene speech gate ===
+  if (scene.disableSpeech === true && scene.enableSpeech !== true) {
+    hardDisableSpeechForScene();
+  } else {
+    // Only re-enable if not explicitly disabled
+    softEnableSpeechForScene();
+  }
+
+  try {
+    if (typeof ensureSpeechUI === 'function') {
+      // Only these types get speech by default
+      const allowTypes = new Set([
+        'hangman',
+        'interaction',
+        'interaction-scramble',
+        'interaction-fill-in-the-blank',
+        'interaction-audio-mc',      // text-based MC; audio-only ones should set disableSpeech:true
+        'video-choice',
+        'video-multi-question',
+        'video-multi-audio-choice',
+        'video-scramble',
+        'video-fill-in-the-blank',
+        'text'
+      ]);
+
+      // Decide if this scene is allowed to show speech UI
+      const allow =
+        scene.enableSpeech === true ||                 // explicit opt-in
+        (allowTypes.has(scene.type) && scene.disableSpeech !== true);
+
+      const hud     = document.getElementById('speech-hud');
+      const panel   = document.getElementById('speech-settings');
+      const testBtn = document.getElementById('speech-test');
+
+      if (allow) {
+        // Make sure UI exists and is visible
+        ensureSpeechUI();
+        if (hud)     hud.style.display = '';
+        if (panel)   panel.style.display = '';
+        if (testBtn) testBtn.style.display = '';
+      } else {
+        // Hard-hide on scenes that shouldn't expose speech
+        if (hud)     hud.style.display = 'none';
+        if (panel)   panel.style.display = 'none';
+        if (testBtn) testBtn.style.display = 'none';
+      }
+    }
+  } catch (e) {
+    console.warn('[speech-gate] error:', e);
+  }
+
+  try {
+  updateSpeechUIForScene(scene);
+} catch (e) {
+  console.warn('[SpeechUI] updateSpeechUIForScene failed:', e);
+}
+
+
+try { updateSpeechUIForScene(scene); } catch (e) {
+  console.warn('[SpeechUI] updateSpeechUIForScene failed:', e);
+}
+
+
 
 
 // --- DENOMINATOR FIRST, THEN PUBLISH CURRENT % ONCE ---
@@ -4199,6 +4520,16 @@ if (scene.choices && scene.choices.length > 0 && choicesDiv) {
       loadScene(choice.next);
     };
     choicesDiv.appendChild(btn);
+    try {
+  // Stamp navigation targets + arm mic reliably
+  stampChoiceNextTargetsFromScene(scene, choicesDiv);
+  if (typeof window.__armSpeechForChoices === 'function') {
+    window.__armSpeechForChoices(choicesDiv);
+  }
+} catch(_) {}
+
+
+    
   });
   return;
 }
@@ -4255,6 +4586,233 @@ if (scene.choices && scene.choices.length > 0 && choicesDiv) {
     console.log(`>>> No Play Again button added on scene "${id}".`);
   }
 }
+
+// === UNIVERSAL CHOICE TARGET STAMPER (engine-level, loader-agnostic) ===
+(function installChoiceTargetStamper(){
+  if (window.__choiceStamperInstalled) return;
+  window.__choiceStamperInstalled = true;
+
+  // Normalizer for text matching
+  const norm = s => String(s||'')
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g,"'")
+    .replace(/[\u201C\u201D]/g,'"')
+    .replace(/\s+/g,' ')
+    .trim();
+
+  function stampIn(container){
+    if (!container) return;
+
+    // Current scene model
+    const sc = (window.scenes||{})[window.currentSceneId];
+    if (!sc || !Array.isArray(sc.choices) || !sc.choices.length) return;
+
+    // Prepare a light model for matching
+    const model = sc.choices.map((c, i) => ({
+      i,
+      head: norm(String(c.text||'').slice(0, 160)),
+      next: c && c.next
+    }));
+
+    // WeakMap from global, if present
+    const wmap = (window.__choiceNextMap instanceof WeakMap) ? window.__choiceNextMap : null;
+
+    // Walk all visible .choice buttons under the container
+    const btns = container.querySelectorAll('.choice');
+    btns.forEach((b, idx) => {
+      // Skip if already stamped
+      if (b.getAttribute('data-next')) return;
+
+      let target = '';
+
+      // 1) origin index (handles shuffle that preserves data-originIndex)
+      const oiRaw = b.getAttribute('data-originIndex') || b.getAttribute('data-originindex');
+      const oi = Number(oiRaw);
+      if (!target && Number.isFinite(oi) && model[oi] && model[oi].next) {
+        target = model[oi].next;
+      }
+
+      // 2) text head match (robust; works when originIndex is missing)
+      if (!target) {
+        const head = norm((b.textContent||'').slice(0, 160));
+        const hit = model.find(m =>
+          m.head && (
+            head === m.head ||
+            head.startsWith(m.head) || m.head.startsWith(head) ||
+            head.includes(m.head) || m.head.includes(head)
+          )
+        );
+        if (hit && hit.next) target = hit.next;
+      }
+
+      if (target) {
+        b.setAttribute('data-next', target);
+        b.setAttribute('aria-next', target);
+        if (wmap) wmap.set(b, target);
+      }
+    });
+  }
+
+  // Observe additions to the canonical choices host(s)
+  const hostSelector = '#choices-container, #vc-choices';
+  const mo = new MutationObserver(muts => {
+    for (const m of muts) {
+      if (m.type === 'childList') {
+        // Try stamping whenever children change
+        document.querySelectorAll(hostSelector).forEach(stampIn);
+      }
+    }
+  });
+
+  function armObserver(){
+    // (Re)attach observer to the game container (covers all scenes)
+    const gc = document.getElementById('game-container') || document.body;
+    try { mo.disconnect(); } catch(_){}
+    mo.observe(gc, { childList:true, subtree:true });
+    // Also run a pass now in case choices already exist
+    document.querySelectorAll(hostSelector).forEach(stampIn);
+  }
+
+  // Run on boot and after every loadScene
+  armObserver();
+
+  // Wrap loadScene to stamp after render (without changing its behavior)
+  const orig = window.loadScene;
+  if (typeof orig === 'function' && !orig.__choiceStampWrapped) {
+    const wrapped = function(id){
+      const r = orig.apply(this, arguments);
+      // After next paint, stamp whatever is on screen
+      try {
+        requestAnimationFrame(() => {
+          document.querySelectorAll(hostSelector).forEach(stampIn);
+        });
+      } catch(_){}
+      return r;
+    };
+    wrapped.__choiceStampWrapped = true;
+    window.loadScene = wrapped;
+  }
+
+  // If your loaders fire a "choices-ready" event, respond to it too.
+  document.addEventListener('choices-ready', () => {
+    document.querySelectorAll(hostSelector).forEach(stampIn);
+  });
+
+})();
+
+
+
+
+
+/* ---------- VIDEO-CHOICE NEXT-TARGET SAFETY NET (global, once) ---------- */
+(function installVideoChoiceNextSafetyNet(){
+  if (window.__videoChoiceSafetyNetInstalled) return;
+  window.__videoChoiceSafetyNetInstalled = true;
+
+  function norm(s){
+    return String(s||'').toLowerCase()
+      .replace(/[\u2018\u2019]/g,"'")
+      .replace(/[\u201C\u201D]/g,'"')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+  function head(s, n=140){ return String(s||'').slice(0,n); }
+
+  function bindNextForCurrentScene(){
+    try{
+      const id = window.currentSceneId;
+      const sc = (window.scenes||{})[id];
+      if (!sc || sc.type !== 'video-choice' || !Array.isArray(sc.choices)) return;
+
+      const model = sc.choices.map(c => ({
+        text: String(c.text||''),
+        head: norm(head(c.text, 160)),
+        next: c.next || ''
+      }));
+
+      // look in both common containers
+      const btns = document.querySelectorAll('#choices-container .choice, #vc-choices .choice');
+      btns.forEach(btn=>{
+        // already has a target?
+        if (btn.getAttribute('data-next')) return;
+
+        // 1) originIndex -> scene.choices[originIndex].next (shuffle-safe if you stamped originIndex)
+        const oi = Number(btn.getAttribute('data-originIndex') || btn.getAttribute('data-originindex'));
+        if (Number.isFinite(oi) && model[oi] && model[oi].next) {
+          const nx = model[oi].next;
+          btn.setAttribute('data-next', nx);
+          if (window.__choiceNextMap instanceof WeakMap) window.__choiceNextMap.set(btn, nx);
+          return;
+        }
+
+        // 2) text-head match (robust when shuffle is ON)
+        const bHead = norm(head(btn.textContent||'', 160));
+        const hit = model.find(m =>
+          (bHead && m.head && (bHead.startsWith(m.head) || m.head.startsWith(bHead) || bHead.includes(m.head) || m.head.includes(bHead)))
+        );
+        if (hit && hit.next){
+          btn.setAttribute('data-next', hit.next);
+          if (window.__choiceNextMap instanceof WeakMap) window.__choiceNextMap.set(btn, hit.next);
+        }
+      });
+    } catch(e){ console.warn('[video-choice][net] bind error', e); }
+  }
+
+  // A) Bind when your loaders announce choices; your code already fires this for video-choice / vmq
+  document.addEventListener('choices-ready', bindNextForCurrentScene);
+
+  // B) Also bind on microtask when scene changes (covers loaders that don’t emit choices-ready)
+  const origLoad = window.loadScene;
+  if (typeof origLoad === 'function'){
+    window.loadScene = function(id){
+      const r = origLoad.apply(this, arguments);
+      // try shortly after render
+      setTimeout(bindNextForCurrentScene, 0);
+      setTimeout(bindNextForCurrentScene, 50);
+      setTimeout(bindNextForCurrentScene, 120);
+      return r;
+    };
+  }
+
+  // C) Last-chance click interceptor (capture) — only for video-choice scenes
+  document.addEventListener('click', function(ev){
+    const el = ev.target && ev.target.closest && ev.target.closest('.choice');
+    if (!el) return;
+    const id = window.currentSceneId;
+    const sc = (window.scenes||{})[id];
+    if (!sc || sc.type !== 'video-choice') return;
+
+    // If button already has a target, let the normal handler proceed
+    const already = el.getAttribute('data-next') ||
+                    (window.__choiceNextMap instanceof WeakMap && window.__choiceNextMap.get(el)) ||
+                    el.getAttribute('aria-next');
+    if (already) return;
+
+    // Resolve now by matching text to scene.choices and navigate
+    try{
+      const model = (sc.choices||[]).map(c => ({
+        text: String(c.text||''),
+        head: norm(head(c.text, 160)),
+        next: c.next || ''
+      }));
+      const bHead = norm(head(el.textContent||'', 160));
+      const hit = model.find(m =>
+        (bHead && m.head && (bHead.startsWith(m.head) || m.head.startsWith(bHead) || bHead.includes(m.head) || m.head.includes(bHead)))
+      );
+      if (hit && hit.next){
+        // stamp for future and navigate
+        el.setAttribute('data-next', hit.next);
+        if (window.__choiceNextMap instanceof WeakMap) window.__choiceNextMap.set(el, hit.next);
+        ev.preventDefault(); ev.stopPropagation();
+        try { window.loadScene(hit.next); } catch(e){ console.warn('[video-choice][net] force nav failed', e); }
+      }
+    } catch(e){ console.warn('[video-choice][net] click resolve error', e); }
+  }, true);
+
+  console.log('[video-choice] safety-net installed');
+})();
+
+
 
 
 
@@ -4331,7 +4889,7 @@ function checkScrambleAnswer(correctOrder, nextSceneId) {
 }
 
 
-// === Drag-and-drop Fill-in-the-Blank (pink-magenta theme) ===
+// === Drag-and-drop Fill-in-the-Blank ===
 function loadFillInTheBlankScene(sceneId, container) {
   const infoDiv = document.getElementById("challenge-info");
   if (infoDiv) {
@@ -4340,21 +4898,20 @@ function loadFillInTheBlankScene(sceneId, container) {
   }
 
   const scene = scenes[sceneId];
-
   // --- Defensive: build sentence/blanks from "___" if not provided ---
-  if (!Array.isArray(scene.sentence) || !Array.isArray(scene.blanks)) {
-    const parts = String(scene.text || '').split('___');
-    const toks = []; const blanks = [];
-    const toWords = s => String(s).trim().split(/\s+/).filter(Boolean);
-    parts.forEach((seg, i) => {
-      if (seg) toks.push(...toWords(seg));
-      if (i < parts.length - 1) { blanks.push(toks.length); toks.push('___'); }
-    });
-    scene.sentence = Array.isArray(scene.sentence) ? scene.sentence : toks;
-    scene.blanks   = Array.isArray(scene.blanks)   ? scene.blanks   : blanks;
-  }
-  // normalize correct to array
-  if (typeof scene.correct === 'string') scene.correct = [scene.correct];
+if (!Array.isArray(scene.sentence) || !Array.isArray(scene.blanks)) {
+  const parts = String(scene.text || '').split('___');
+  const toks = []; const blanks = [];
+  const toWords = s => String(s).trim().split(/\s+/).filter(Boolean);
+  parts.forEach((seg, i) => {
+    if (seg) toks.push(...toWords(seg));
+    if (i < parts.length - 1) { blanks.push(toks.length); toks.push('___'); }
+  });
+  scene.sentence = Array.isArray(scene.sentence) ? scene.sentence : toks;
+  scene.blanks   = Array.isArray(scene.blanks)   ? scene.blanks   : blanks;
+}
+// normalize correct to array
+if (typeof scene.correct === 'string') scene.correct = [scene.correct];
 
   if (!scene) {
     console.error(`Scene ${sceneId} not found.`);
@@ -4375,23 +4932,6 @@ function loadFillInTheBlankScene(sceneId, container) {
   const optionsEl = container.querySelector("#fill-blank-options");
   const feedbackEl = container.querySelector("#fill-blank-feedback");
 
-  // Style heading and intro to match pink theme & readability
-  const h2 = container.querySelector("h2");
-  if (h2) {
-    h2.style.cssText = `
-      display:inline-block;
-      color: var(--accent-pink-700);
-      background: var(--accent-pink-50);
-      border: 1px solid var(--accent-pink);
-      border-radius: 10px;
-      padding: 6px 10px;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-    `;
-  }
-  const pIntro = container.querySelector("p");
-  if (pIntro) pIntro.style.color = "var(--text-default)";
-
   // Destroy any existing Sortable instances before creating new ones
   if (container._sortableBlanks) {
     container._sortableBlanks.forEach(s => s.destroy());
@@ -4402,65 +4942,44 @@ function loadFillInTheBlankScene(sceneId, container) {
     container._sortableOptions = null;
   }
 
-  // Render the sentence with blanks as droppable zones (pink styling)
+  // Render the sentence with blanks as droppable zones
   let html = "";
   for (let i = 0; i < scene.sentence.length; i++) {
     if (scene.blanks.includes(i)) {
       html += `<span class="fill-blank-dropzone" data-index="${i}" style="
-        display:inline-block;
-        min-width: 88px;
-        padding: 4px 6px;
+        display: inline-block;
+        min-width: 80px;
+        border-bottom: 2px solid #00ffff;
         margin: 0 4px;
         vertical-align: bottom;
-        border-radius: 10px;
-        background: var(--accent-pink-50);
-        border: 2px dashed var(--accent-pink);
+        padding: 4px 6px;
         cursor: pointer;
+        background-color: #111;
       "></span> `;
     } else {
-      html += `<span style="margin: 0 4px; color: var(--text-default);">${scene.sentence[i]}</span> `;
+      html += `<span style="margin: 0 4px;">${scene.sentence[i]}</span> `;
     }
   }
   sentenceEl.innerHTML = html;
 
-  // Render draggable options (pink outline; fills on hover)
+  // Render draggable options
   optionsEl.innerHTML = "";
   scene.options.forEach(opt => {
     const btn = document.createElement("button");
     btn.textContent = opt;
     btn.className = "fill-blank-option";
     btn.style.cssText = `
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 2px solid var(--accent-pink);
-      background: #fff;
-      color: var(--accent-pink);
-      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 2px solid #00ffff;
+      background: #000;
+      color: #0ff;
+      font-weight: bold;
       cursor: grab;
       user-select: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     `;
-    btn.onmouseenter = () => { btn.style.background = "var(--accent-pink)"; btn.style.color = "#fff"; };
-    btn.onmouseleave = () => { btn.style.background = "#fff";               btn.style.color = "var(--accent-pink)"; };
     optionsEl.appendChild(btn);
   });
-
-  // Style the "Check Answer" button to match pink theme
-  const checkBtn = container.querySelector("#check-fill-blank-answer");
-  if (checkBtn) {
-    checkBtn.style.cssText = `
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 2px solid var(--accent-pink);
-      background: #fff;
-      color: var(--accent-pink);
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    `;
-    checkBtn.onmouseenter = () => { checkBtn.style.background = "var(--accent-pink)"; checkBtn.style.color = "#fff"; };
-    checkBtn.onmouseleave = () => { checkBtn.style.background = "#fff";               checkBtn.style.color = "var(--accent-pink)"; };
-  }
 
   // Setup SortableJS for blanks (droppable zones)
   const dropzones = sentenceEl.querySelectorAll(".fill-blank-dropzone");
@@ -4498,7 +5017,7 @@ function loadFillInTheBlankScene(sceneId, container) {
     animation: 150,
   });
 
-  // Check answer button logic (accessible feedback colors)
+  // Check answer button logic
   container.querySelector("#check-fill-blank-answer").onclick = () => {
     const userAnswers = [];
     let allFilled = true;
@@ -4512,7 +5031,7 @@ function loadFillInTheBlankScene(sceneId, container) {
 
     if (!allFilled) {
       feedbackEl.textContent = "⚠️ Please fill all blanks.";
-      feedbackEl.style.color = "#B36B00"; // darker amber for readability
+      feedbackEl.style.color = "orange";
       return;
     }
 
@@ -4523,8 +5042,8 @@ function loadFillInTheBlankScene(sceneId, container) {
 
     if (allCorrect) {
       feedbackEl.textContent = "✅ Correct! Well done.";
-      feedbackEl.style.color = "#1E7F3B"; // accessible green
-      // ✅ award unlocks/flags for this scene
+      feedbackEl.style.color = "lightgreen";
+            // ✅ award unlocks/flags for this scene
       if (Array.isArray(scene.unlockScenes)) scene.unlockScenes.forEach(unlockScene);
       if (Array.isArray(scene.setFlags)) scene.setFlags.forEach(setFlag);
       if (scene.next) {
@@ -4532,11 +5051,10 @@ function loadFillInTheBlankScene(sceneId, container) {
       }
     } else {
       feedbackEl.textContent = "❌ Not quite. Try again.";
-      feedbackEl.style.color = "#C0392B"; // accessible red
+      feedbackEl.style.color = "red";
     }
   };
 }
-
 
 
 
@@ -4569,6 +5087,8 @@ function attachTapToPlay(videoEl, label = "▶ Tap to play") {
 
   return { btn, tryPlay };
 }
+
+
 
 
 
@@ -4624,6 +5144,27 @@ function loadVideoScene(id) {
   function clearTimer(){ if (timerId) { clearInterval(timerId); timerId = null; } }
 
   function buildChoicesPanel(fromScene) {
+    // Disarm the video so it can't replay or steal focus
+    try { video.pause(); } catch(_) {}
+    try { video.currentTime = 0; } catch(_) {}
+    video.removeAttribute("controls");
+    video.style.pointerEvents = "none";
+    video.style.opacity = "0.25";
+    video.setAttribute("aria-hidden", "true");
+
+    // 🔔 notify hooks that choices are ready (id + type)
+try {
+  document.dispatchEvent(new CustomEvent('choices-ready', { detail: { sceneId: window.currentSceneId, type: 'video-choice' } }));
+} catch(_) {}
+
+// 🎤 arm speech for these choices (id="choices-container")
+try {
+  if (typeof window.__armSpeechForChoices === 'function') {
+    window.__armSpeechForChoices(document.getElementById('choices-container'));
+  }
+} catch(_) {}
+
+
     // Remove old panel if any
     ["video-choices","video-choices-timer","video-choices-feedback"].forEach(id => {
       const n = document.getElementById(id); if (n) n.remove();
@@ -4644,23 +5185,29 @@ function loadVideoScene(id) {
     const seconds = (rawSec === true) ? 15
                    : (Number.isFinite(rawSec) && rawSec > 0 ? Math.floor(rawSec) : null);
 
-    // Timer row
-    let timerDiv = null;
+    // ---------- Timer with pause/resume + SceneTimer API ----------
+    let timerDiv = null, timeLeft = seconds || 0, paused = false;
+
     if (seconds) {
-      let timeLeft = seconds;
       timerDiv = document.createElement("div");
       timerDiv.id = "video-choices-timer";
       timerDiv.style.cssText = "font-weight:700;font-size:1.05rem;color:#00ffff;margin:8px 0;";
-      timerDiv.textContent = `⏳ Time left: ${timeLeft}s`;
       game.appendChild(timerDiv);
+
+      const render = () => {
+        if (timerDiv) timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s${paused?' (paused)':''}`;
+      };
+      render();
 
       clearTimer();
       timerId = setInterval(() => {
+        if (paused) return;
         timeLeft -= 1;
-        if (timerDiv) timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s`;
+        render();
         if (timeLeft <= 0) {
           clearTimer();
           const timeoutDest =
+            choicesSrc.timeoutNext ||
             (choicesSrc.endings && choicesSrc.endings.timeout) ||
             (scene.endings && scene.endings.timeout) ||
             scene.next;
@@ -4669,11 +5216,47 @@ function loadVideoScene(id) {
       }, 1000);
     }
 
-    // Choices wrap
+    // Expose scene timer API for the speech hook
+    const prevSceneTimer = window.SceneTimer; // to restore on cleanup
+    window.SceneTimer = {
+      pause:  () => { paused = true;  if (timerDiv) timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s (paused)`; },
+      resume: () => { paused = false; if (timerDiv) timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s`; },
+      isPaused: () => paused,
+      getTimeLeft: () => timeLeft
+    };
+
+    // Pause/resume timer when speech starts/finishes/cancels
+    const onSpeechStart  = () => { try { window.SceneTimer?.pause?.(); } catch(_) {} };
+    const onSpeechFinish = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+    const onSpeechCancel = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+    document.addEventListener('speech-start',  onSpeechStart);
+    document.addEventListener('speech-finish', onSpeechFinish);
+    document.addEventListener('speech-cancel', onSpeechCancel);
+
+    // ---------- Choices wrap + MC host expected by speech hook ----------
     const wrap = document.createElement("div");
     wrap.id = "video-choices";
     wrap.style.cssText = "display:flex;flex-direction:column;gap:10px;margin:10px 0;";
     game.appendChild(wrap);
+
+    // STANDARD MC container for the speech hook
+    const mcHost = document.createElement("div");
+    mcHost.id = "choices-container";
+    mcHost.style.cssText = "display:flex;flex-direction:column;gap:8px;";
+    wrap.appendChild(mcHost);
+
+    try {
+  stampChoiceNextTargetsFromScene(choicesSrc, mcHost);
+  if (typeof window.__armSpeechForChoices === 'function') {
+    window.__armSpeechForChoices(mcHost);
+  }
+} catch(_) {}
+
+
+    try {
+  document.dispatchEvent(new CustomEvent('choices-ready', { detail:{ sceneId: window.currentSceneId } }));
+} catch(_){}
+
 
     // Feedback (optional)
     const fb = document.createElement("div");
@@ -4685,6 +5268,9 @@ function loadVideoScene(id) {
     const hasFlag    = (f) => window.progress && window.progress.flags && !!window.progress.flags[f];
     const isUnlocked = (s) => window.progress && window.progress.unlocked && window.progress.unlocked.has && window.progress.unlocked.has(s);
 
+    // Shared WeakMap for navigation fallbacks
+    window.__choiceNextMap = window.__choiceNextMap || new WeakMap();
+
     (choicesSrc.choices || []).forEach(choice => {
       const reqFlags = choice.requiresFlags || [];
       const reqScenes = choice.requiresScenes || [];
@@ -4692,9 +5278,18 @@ function loadVideoScene(id) {
       const okScenes = reqScenes.every(isUnlocked);
       const available = okFlags && okScenes;
 
+      const nextTarget = String(choice.next || "");
+
       const btn = document.createElement("button");
+      btn.className = "choice";                                 // ← required by speech
       btn.textContent = available ? choice.text : `🔒 ${choice.text}`;
       btn.disabled = !available;
+
+      // ← expose NEXT via multiple channels the speech layer expects
+      btn.dataset.next = nextTarget;
+      btn.setAttribute('aria-next', nextTarget);
+      window.__choiceNextMap.set(btn, nextTarget);
+
       btn.style.cssText = "text-align:left;padding:10px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
       btn.onmouseenter = () => (btn.style.background = "#00cccc");
       btn.onmouseleave = () => (btn.style.background = "#00ffff");
@@ -4702,17 +5297,42 @@ function loadVideoScene(id) {
       regListener(btn, "click", () => {
         clearTimer();
         if (!available) return;
+        try { document.dispatchEvent(new Event('speech-commit')); } catch(_){}
         if (choice.applyCrm) {
           try { window.crm && window.crm.apply(choice.applyCrm); } catch(_) {}
         }
-        loadScene(choice.next);
+
+        const before = window.currentSceneId || '';
+        if (nextTarget) loadScene(nextTarget);
+
+        // If something swallowed it, force on next tick (local safeguard)
+        requestAnimationFrame(() => {
+          const after = window.currentSceneId || '';
+          if (after === before && nextTarget) {
+            console.warn('[video] choice click swallowed → forcing loadScene:', nextTarget, { before });
+            try { window.loadScene(nextTarget); } catch(e){ console.warn('[video] force navigate failed', e); }
+          }
+        });
       });
 
-      wrap.appendChild(btn);
+      mcHost.appendChild(btn);
     });
 
+    // Notify the speech layer that visible choices exist
+    try { document.dispatchEvent(new CustomEvent('choices-ready', { detail: { sceneId: id } })); } catch {}
+
     // Cleanup on leave
-    regCleanup(() => { clearTimer(); const n = document.getElementById("video-choices"); if (n) n.remove(); const t = document.getElementById("video-choices-timer"); if (t) t.remove(); const f = document.getElementById("video-choices-feedback"); if (f) f.remove(); });
+    regCleanup(() => {
+      clearTimer();
+      document.removeEventListener('speech-start',  onSpeechStart);
+      document.removeEventListener('speech-finish', onSpeechFinish);
+      document.removeEventListener('speech-cancel', onSpeechCancel);
+      // best-effort restore previous SceneTimer
+      try { window.SceneTimer = prevSceneTimer || null; } catch(_) {}
+      const n = document.getElementById("video-choices"); if (n) n.remove();
+      const t = document.getElementById("video-choices-timer"); if (t) t.remove();
+      const f = document.getElementById("video-choices-feedback"); if (f) f.remove();
+    });
   }
 
   function onEnded() {
@@ -4723,8 +5343,6 @@ function loadVideoScene(id) {
   }
 
   regListener(video, "ended", onEnded);
-  // If you need a “Skip” (optional): press Enter to skip to choices
-  // regListener(document, "keydown", (e)=>{ if(e.key==="Enter"){ try{ video.pause(); }catch(_){} onEnded(); } });
 
   // Cleanup when leaving this scene
   regCleanup(() => {
@@ -4734,6 +5352,7 @@ function loadVideoScene(id) {
     ["video-choices","video-choices-timer","video-choices-feedback"].forEach(id => { const n = document.getElementById(id); if (n) n.remove(); });
   });
 }
+
 
 
 
@@ -4838,7 +5457,7 @@ sceneImage.innerHTML = `<img src="${scene.image}" alt="Scene Image"${imgClass}>`
     if (!interactionDiv) return;
 
     interactionDiv.innerHTML = `
-      <audio id="interaction-audio" controls>
+      <audio id="interaction-audio" controls preload="auto">
         <source src="${interaction.audio}" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
@@ -4848,6 +5467,7 @@ sceneImage.innerHTML = `<img src="${scene.image}" alt="Scene Image"${imgClass}>`
     `;
 
     const audio = document.getElementById("interaction-audio");
+    prepAudioElement(audio);
 
     audio.onplay = () => {
       console.log("Audio started playing");
@@ -4996,10 +5616,7 @@ sendBtn.onclick = () => {
 function loadInteractionScrambleScene(id) {
   console.log(`Loading interaction-scramble scene: ${id}`);
   const scene = scenes[id];
-  if (!scene) {
-    console.error(`Scene data not found for ID: ${id}`);
-    return;
-  }
+  if (!scene) { console.error(`Scene data not found for ID: ${id}`); return; }
 
   const scrambleDiv = document.getElementById("sentence-scramble");
   const feedbackDiv = document.getElementById("scramble-feedback");
@@ -5014,10 +5631,7 @@ function loadInteractionScrambleScene(id) {
 
   // Clear unrelated UI containers
   [container, emailContainer, fillBlankContainer, choicesDiv, sceneText, sceneImage, scene6UI].forEach(el => {
-    if (el) {
-      el.style.display = "none";
-      el.innerHTML = "";
-    }
+    if (el) { el.style.display = "none"; el.innerHTML = ""; }
   });
 
   // Setup scramble UI
@@ -5029,14 +5643,11 @@ function loadInteractionScrambleScene(id) {
   // Show info text if present
   if (infoDiv) {
     if (scene.emailFromClient) {
-      infoDiv.style.display = "block";
-      infoDiv.innerHTML = scene.emailFromClient;
+      infoDiv.style.display = "block"; infoDiv.innerHTML = scene.emailFromClient;
     } else if (scene.contextText) {
-      infoDiv.style.display = "block";
-      infoDiv.textContent = scene.contextText;
+      infoDiv.style.display = "block"; infoDiv.textContent = scene.contextText;
     } else {
-      infoDiv.style.display = "none";
-      infoDiv.innerHTML = "";
+      infoDiv.style.display = "none"; infoDiv.innerHTML = "";
     }
   }
 
@@ -5059,25 +5670,19 @@ function loadInteractionScrambleScene(id) {
   scrambleDiv.appendChild(scrambleContainer);
 
   // Destroy old Sortable instance
-  if (window.scrambleSortable) {
-    window.scrambleSortable.destroy();
-  }
+  if (window.scrambleSortable) { window.scrambleSortable.destroy(); }
   window.scrambleSortable = Sortable.create(scrambleContainer, { animation: 150 });
 
   // Audio player
   let audioElem = document.getElementById("scene-audio");
-  if (audioElem) {
-    audioElem.pause();
-    audioElem.src = "";
-    audioElem.load();
-    audioElem.remove();
-  }
+  if (audioElem) { audioElem.pause(); audioElem.src = ""; audioElem.load(); audioElem.remove(); }
   audioElem = document.createElement("audio");
   audioElem.id = "scene-audio";
   audioElem.controls = true;
+  audioElem.preload = "auto";
   audioElem.src = scene.audio;
   document.getElementById("game-container").appendChild(audioElem);
-  audioElem.load();
+  prepAudioElement(audioElem);
 
   // Submit button
   let submitBtn = document.getElementById("scramble-submit-btn");
@@ -5104,7 +5709,112 @@ function loadInteractionScrambleScene(id) {
   };
   submitBtn.addEventListener('click', onSubmit);
   submitBtn._listener = onSubmit;
+
+  /* =======================
+     🎙️ Speak Answer (adds button + auto-reorder on pass)
+     ======================= */
+
+  // Remove any previous Speak button to avoid duplicates
+  const oldSpeak = document.getElementById("scramble-speak-btn");
+  if (oldSpeak) oldSpeak.remove();
+
+  // Create Speak-to-answer button
+  const speakBtn = document.createElement("button");
+  speakBtn.id = "scramble-speak-btn";
+  speakBtn.textContent = "🎙️ Speak Answer";
+  speakBtn.style.marginLeft = "8px";
+  scrambleDiv.appendChild(speakBtn);
+
+  const expected = Array.isArray(scene.correct) ? scene.correct.join(' ') : String(scene.correct || '');
+
+  // Helper: reorder DOM to match an array of tokens
+  function reorderScrambleTo(order) {
+    // Create a map of token -> array of nodes (handles duplicates)
+    const pool = {};
+    [...scrambleContainer.children].forEach(node => {
+      const t = node.textContent.trim();
+      (pool[t] = pool[t] || []).push(node);
+    });
+    // Append in the new order
+    order.forEach(tok => {
+      const bucket = pool[tok] && pool[tok].length ? pool[tok].shift() : null;
+      if (bucket) scrambleContainer.appendChild(bucket);
+    });
+  }
+
+if (typeof attachSpeechCheck === 'function') {
+  console.log('[speech] using attachSpeechCheck path (loader)');
+
+  const tol = (window.SpeechFeature?.settings?.tolerance) ?? 0.80;
+  const so  = scene.speechOptions || {}; // optional per-scene knobs
+
+  attachSpeechCheck(speakBtn, expected, {
+    minCoverage: tol,
+
+    // 🔒 strict order for scrambles
+    requireMonotonic: true,
+    allowOrderFlex: false,
+    orderMin: (typeof so.orderMin === 'number') ? so.orderMin : 0.95,
+
+    // optional tuning (if you set these on the scene)
+    maxEditDistance: so.maxEditDistance,
+    stopWords: so.stopWords,
+    synonyms: so.synonyms,             // e.g., { comparability: ['compatibility','comparibility'] }
+    weight: so.weights ? {
+      token:   (typeof so.weights.coverage === 'number' ? so.weights.coverage : 0.55),
+      phoneme: (typeof so.weights.phoneme  === 'number' ? so.weights.phoneme  : 0.35)
+    } : { token: 0.7, phoneme: 0.3 }
+  });
+
+  // PASS → snap to exact order + submit
+  speakBtn.addEventListener('speech-pass', (ev) => {
+    try { reorderScrambleTo(scene.correct || []); } catch(_) {}
+    try { onSubmit(); } catch(_) { document.getElementById('scramble-submit-btn')?.click(); }
+
+    const d = ev?.detail || {};
+    console.log(
+      '[attachSpeechCheck→loader] PASS · token=%s%% phoneme=%s%% blended=%s%% order=%s%%',
+      Math.round((d.token?.coverage   || 0)*100),
+      Math.round((d.phoneme?.coverage || 0)*100),
+      Math.round((d.blended           || 0)*100),
+      Math.round((d.orderScore        || 0)*100)
+    );
+  });
+
+  // FAIL → gentle hint; assist if very close but order slightly off
+  speakBtn.addEventListener('speech-fail', (ev) => {
+    const d = ev?.detail || {};
+    const blended = d.blended ?? 0;
+    const order   = d.orderScore ?? 0;
+
+    // show a small nudge
+    const fb = document.getElementById('scramble-feedback');
+    if (fb) {
+      fb.style.display = 'block';
+      fb.style.color   = '#ffd166';
+      fb.textContent   = `Heard ~${Math.round(blended*100)}%. Try again.`;
+    }
+
+    // strong attempt assist
+    if (blended >= tol * 0.98 && order >= 0.85) {
+      try { reorderScrambleTo(scene.correct || []); } catch(_) {}
+      if (fb) {
+        fb.style.color = '#a0e7e5';
+        fb.textContent = 'Nice! We arranged the blocks from your speech — review & submit.';
+      }
+      // auto-submit if you want:
+      // try { onSubmit(); } catch(_) { document.getElementById('scramble-submit-btn')?.click(); }
+    }
+  });
+} else {
+  console.log('[speech] attachSpeechCheck missing → disabled (loader)');
+  speakBtn.disabled = true;
+  speakBtn.title = 'Speech not available (attachSpeechCheck missing)';
 }
+
+}
+
+
 
 function loadInteractionFillBlankScene(id) {
   console.log(`Loading interaction-fill-in-the-blank scene: ${id}`);
@@ -5164,9 +5874,10 @@ function loadInteractionFillBlankScene(id) {
   audioElem = document.createElement("audio");
   audioElem.id = "scene-audio";
   audioElem.controls = true;
+  audioElem.preload = "auto";
   audioElem.src = scene.audio;
   document.getElementById("game-container").appendChild(audioElem);
-  audioElem.load();
+  prepAudioElement(audioElem);
 
   // Build fill-in-the-blank UI
   fillBlankContainer.innerHTML = `
@@ -5307,6 +6018,17 @@ function loadInteractionAudioMCScene(id) {
   const scene = scenes[id];
   if (!scene) { console.error(`Scene ${id} not found.`); return; }
 
+  // ===== Minimal safety: stop any other audio on the page (from prior scenes)
+  try {
+    document.querySelectorAll('audio').forEach(a => {
+      // Do not touch the ones we are about to create (they don't exist yet)
+      try { a.pause(); } catch {}
+      a.removeAttribute('loop');
+      a.src = ''; // detach source so it truly stops
+      try { a.load(); } catch {}
+    });
+  } catch {}
+
   // Optional: reset a cross-scene tally at the START of a block
   try {
     if (scene.tallyKey && scene.tallyReset && typeof tallyReset === 'function') {
@@ -5318,7 +6040,7 @@ function loadInteractionAudioMCScene(id) {
   // Shorthands
   const regNode     = window.registerNode     || function(){};
   const regListener = window.registerListener || function(t,e,h){ t.addEventListener(e,h); };
-  const regCleanup  = window.registerCleanup  || function(){};
+  const regCleanup  = window.registerCleanup  || function(fn){ try{ window.__sceneCleanups = (window.__sceneCleanups||[]); window.__sceneCleanups.push(fn);}catch{} };
 
   // Base containers
   const game = document.getElementById("game-container");
@@ -5337,6 +6059,30 @@ function loadInteractionAudioMCScene(id) {
   regNode(ui);
   game.appendChild(ui);
 
+  // --- tiny helper: attempt autoplay; on block, show a tap-to-play button ---
+  function safePlay(audioEl, label = '▶️ Tap to play audio') {
+    if (!audioEl) return;
+    audioEl.setAttribute('playsinline', ''); // iOS/Safari friendliness
+    try {
+      const p = audioEl.play();
+      if (p && typeof p.then === 'function') {
+        p.catch(() => {
+          // Autoplay blocked → show helper button once
+          if (audioEl.__tapHelperShown) return;
+          audioEl.__tapHelperShown = true;
+          const btn = document.createElement('button');
+          btn.textContent = label;
+          btn.style.cssText = 'margin:10px 0;padding:8px 12px;border-radius:8px;border:1px solid #2b3038;background:#1e2127;color:#eaeaea;cursor:pointer;display:block;';
+          audioEl.insertAdjacentElement('afterend', btn);
+          btn.addEventListener('click', () => {
+            btn.disabled = true;
+            audioEl.play().then(() => btn.remove()).catch(() => { btn.disabled = false; });
+          });
+        });
+      }
+    } catch {}
+  }
+
   // Prompt audio (the clip you listen to before answering)
   let prompt = null;
   if (scene.audio) {
@@ -5344,9 +6090,16 @@ function loadInteractionAudioMCScene(id) {
     prompt.id = "iamc-prompt";
     prompt.controls = true;
     prompt.src = scene.audio;
+    prompt.preload = "auto";
+    prompt.setAttribute('playsinline','');
     prompt.style.cssText = "width:100%;max-width:640px;display:block;margin:0 auto 12px;";
     regNode(prompt);
     ui.appendChild(prompt);
+    // If you have prepAudioElement, keep it; it's fine as long as it doesn't remove nodes
+    try { prepAudioElement(prompt); } catch {}
+
+    // Try to start immediately (counts as user gesture in many flows). If blocked, we’ll show a tap helper.
+    safePlay(prompt, '▶️ Tap to play prompt');
   }
 
   // Timer UI (starts only when the prompt audio ENDS)
@@ -5432,6 +6185,7 @@ function loadInteractionAudioMCScene(id) {
   function finish(isCorrect, reason) {
     if (locked) return; locked = true;
     clearTimer();
+    try { console.log('[iamc finish]', id, { isCorrect, reason }); } catch(_) {}
 
     // tally
     try {
@@ -5464,6 +6218,9 @@ function loadInteractionAudioMCScene(id) {
   optionsWrap.style.cssText = "display:flex;flex-direction:column;gap:10px;margin:10px 0;";
   ui.appendChild(optionsWrap);
 
+  // Track audio nodes we create here to stop on cleanup
+  const createdAudios = [];
+
   items.forEach(({opt, i: originalIndex}, idxShown) => {
     if (looksLikeAudio(opt)) {
       const row = document.createElement("div");
@@ -5471,13 +6228,19 @@ function loadInteractionAudioMCScene(id) {
       const au = document.createElement("audio");
       au.controls = true;
       au.src = opt;
+      au.preload = "auto";
+      au.setAttribute('playsinline','');
       au.style.cssText = "flex:1 1 280px;min-width:220px;";
+      createdAudios.push(au);
+      try { prepAudioElement(au); } catch {}
       const btn = document.createElement("button");
       btn.textContent = `Choose ${idxShown+1}`;
       btn.style.cssText = "padding:8px 12px;border:none;border-radius:8px;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
       btn.onmouseenter = () => (btn.style.background = "#00cccc");
       btn.onmouseleave = () => (btn.style.background = "#00ffff");
-      regListener(btn, "click", () => finish(isCorrectIndex(originalIndex)));
+      const handler = () => finish(isCorrectIndex(originalIndex));
+      regListener(btn, "click", handler);
+      try { btn.__speechProxyClick = handler; } catch(_) {}
       row.appendChild(au); row.appendChild(btn);
       optionsWrap.appendChild(row);
     } else {
@@ -5486,7 +6249,9 @@ function loadInteractionAudioMCScene(id) {
       btn.style.cssText = "text-align:left;padding:10px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
       btn.onmouseenter = () => (btn.style.background = "#00cccc");
       btn.onmouseleave = () => (btn.style.background = "#00ffff");
-      regListener(btn, "click", () => finish(isCorrectIndex(originalIndex)));
+      const handler = () => finish(isCorrectIndex(originalIndex));
+      regListener(btn, "click", handler);
+      try { btn.__speechProxyClick = handler; } catch(_) {}
       optionsWrap.appendChild(btn);
     }
   });
@@ -5498,8 +6263,17 @@ function loadInteractionAudioMCScene(id) {
     startTimer(() => finish(false, 'timeout'));
   }
 
-  // Cleanup on leave
-  regCleanup(() => { clearTimer(); const node = document.getElementById("iamc-ui"); if (node) node.remove(); });
+  // Cleanup on leave (stop audios we created so the next scene is fresh)
+  regCleanup(() => {
+    try { clearTimer(); } catch {}
+    try {
+      createdAudios.forEach(a => { try{ a.pause(); }catch{} a.src=''; try{ a.load(); }catch{} });
+      const p = document.getElementById('iamc-prompt');
+      if (p){ try{ p.pause(); }catch{} p.src=''; try{ p.load(); }catch{} }
+    } catch {}
+    const node = document.getElementById("iamc-ui");
+    if (node) node.remove();
+  });
 }
 
 
@@ -5507,15 +6281,12 @@ function loadInteractionAudioMCScene(id) {
 
 
 
+
  
-// ─────────────────────────────────────────────────────────────────────────────
-// Mobile-safe VIDEO → MULTI QUESTION
-// ─────────────────────────────────────────────────────────────────────────────
 function loadVideoMultiQuestionScene(id) {
   const scene = scenes[id];
   if (!scene) { console.error(`Scene ${id} not found.`); return; }
 
-  // Optional cross-scene tally reset
   try {
     if (scene.tallyKey && scene.tallyReset && typeof tallyReset === 'function') {
       tallyReset(scene.tallyKey, scene.tallyMax ?? (scene.questions?.length || null));
@@ -5524,46 +6295,34 @@ function loadVideoMultiQuestionScene(id) {
 
   const VMQ_DEFAULT_SECONDS = 15;
 
-  // Safe shorthands
   const regNode     = window.registerNode     || function(){};
   const regListener = window.registerListener || function(t,e,h){ t.addEventListener(e,h); };
   const regCleanup  = window.registerCleanup  || function(){};
+  const rs = (typeof resolveSrc === 'function') ? resolveSrc : (s => s || '');
 
   const game = document.getElementById("game-container");
   const sceneText = document.getElementById("scene-text");
   if (game) game.style.display = "block";
   if (sceneText) { sceneText.style.display = "block"; sceneText.textContent = scene.text || ""; }
 
-  // Clear stale UI
-  ["vmq-wrap","scene-video","video-multi-question-timer","video-multi-question-options","video-multi-question-feedback"]
+  ["vmq-wrap","scene-video","video-multi-question-timer","choices-container","video-multi-question-options","video-multi-question-feedback"]
     .forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
 
-  // Wrapper + video (inline-safe)
   const wrap = document.createElement("div");
   wrap.id = "vmq-wrap";
   wrap.style.cssText = "position:relative;max-width:100%;margin:0 auto 16px;";
   game.appendChild(wrap);
 
-const video = document.createElement("video");
-video.id = "scene-video";
-video.controls = true;
-video.preload = "metadata";
-
-// ✅ resolve URLs so GitHub Pages + <base> work
-video.src = resolveSrc(scene.videoSrc);
-if (scene.poster) video.poster = resolveSrc(scene.poster);
-
-// inline-friendly on iOS/mobile
-video.style.cssText = "width:100%;height:auto;max-height:45vh;display:block;border-radius:12px;background:#000;";
-video.setAttribute("playsinline", "");
-video.setAttribute("webkit-playsinline", "");
-video.playsInline = true;
-
-regNode(video);
-
-// (optional while testing)
-// video.addEventListener("error", () => console.log("VMQ video error =", video.error && video.error.code), { once:true });
-
+  const video = document.createElement("video");
+  video.id = "scene-video";
+  video.controls = true;
+  video.preload = "metadata";
+  video.src = rs(scene.videoSrc);
+  if (scene.poster) video.poster = rs(scene.poster);
+  video.style.cssText = "width:100%;height:auto;max-height:45vh;display:block;border-radius:12px;background:#000;";
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.playsInline = true;
   regNode(video);
 
   const overlay = document.createElement("button");
@@ -5582,7 +6341,7 @@ regNode(video);
     msg.style.cssText = "margin-top:8px;color:orange;font-weight:700";
     msg.textContent = "⚠️ This device can’t play the video inline.";
     const a = document.createElement("a");
-    a.href = resolveSrc(scene.videoSrc);
+    a.href = rs(scene.videoSrc);
     a.target = "_blank";
     a.textContent = "Open video in a new tab";
     a.style.cssText = "display:inline-block;margin-left:8px;color:#0ff;text-decoration:underline";
@@ -5595,9 +6354,8 @@ regNode(video);
   wrap.appendChild(overlay);
   wrap.appendChild(skipBtn);
 
-  // State
   const questions = Array.isArray(scene.questions) ? scene.questions : [];
-  let qIndex = 0, score = 0, timerInterval = null, timeLeft = 0;
+  let qIndex = 0, score = 0, timerInterval = null, timeLeft = 0, paused = false;
 
   function resolveTimerSeconds(scene, q) {
     const pick = (v) => {
@@ -5611,13 +6369,50 @@ regNode(video);
     return (perQ != null) ? perQ : (perScene != null ? perScene : VMQ_DEFAULT_SECONDS);
   }
   function clearTimer(){ if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+  function renderTimer(div){ if (div) div.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s${paused?' (paused)':''}`; }
+
+  // SceneTimer for speech hook
+  const prevSceneTimer = window.SceneTimer;
+  const sceneTimerAPI = {
+    pause: () => { paused = true; },
+    resume: () => { paused = false; },
+    isPaused: () => paused,
+    getTimeLeft: () => timeLeft,
+    _clear: () => clearTimer()
+  };
+  window.SceneTimer = sceneTimerAPI;
+
+  // stop timer/video when a speech-driven choice actually commits
+  const onSpeechCommit = () => {
+    try { clearTimer(); } catch(_) {}
+    try { video.pause(); } catch(_) {}
+  };
+  document.addEventListener('speech-commit', onSpeechCommit, { passive:true });
+  regCleanup(() => document.removeEventListener('speech-commit', onSpeechCommit));
+
+  const onSpeechStart  = () => { try { window.SceneTimer?.pause?.(); } catch(_) {} };
+  const onSpeechFinish = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+  const onSpeechCancel = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+  document.addEventListener('speech-start',  onSpeechStart);
+  document.addEventListener('speech-finish', onSpeechFinish);
+  document.addEventListener('speech-cancel', onSpeechCancel);
 
   function finish() {
-    // cleanup
-    ["video-multi-question-timer","video-multi-question-options","video-multi-question-feedback"].forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
+    ["video-multi-question-timer","choices-container","video-multi-question-options","video-multi-question-feedback"].forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
     clearTimer();
     try { video.pause(); } catch(_){}
     if (wrap && wrap.parentNode) wrap.remove();
+
+    document.removeEventListener('speech-start',  onSpeechStart);
+    document.removeEventListener('speech-finish', onSpeechFinish);
+    document.removeEventListener('speech-cancel', onSpeechCancel);
+
+    try {
+      if (window.SceneTimer === sceneTimerAPI) {
+        if (prevSceneTimer) window.SceneTimer = prevSceneTimer;
+        else { delete window.SceneTimer; }
+      }
+    } catch(_) { window.SceneTimer = prevSceneTimer || null; }
 
     if (scene.scoring && scene.endings) {
       const { high = Infinity, medium = -Infinity } = scene.scoring;
@@ -5631,50 +6426,77 @@ regNode(video);
   }
 
   function startQuestions() {
+    // reset state for question 1 and timers
+    window.__speechListening = false;
+    window.__speechChoiceCommitted = false;
+    paused = false;
+
     wrap.style.display = "none";
     try { video.pause(); } catch(_){}
+    try { video.currentTime = 0; } catch(_){}
+    video.removeAttribute("controls");
+    video.style.pointerEvents = "none";
+    video.style.opacity = "0.25";
+
     qIndex = 0; score = 0;
     renderQuestion();
   }
 
+  const normTxt = (s) => String(s||'').toLowerCase()
+    .replace(/[\u2018\u2019]/g,"'")
+    .replace(/[\u201C\u201D]/g,'"')
+    .replace(/\s+/g,' ')
+    .trim();
+
   function renderQuestion() {
     if (qIndex >= questions.length) return finish();
 
-    // clear old
-    ["video-multi-question-timer","video-multi-question-options","video-multi-question-feedback"].forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
+    ["video-multi-question-timer","choices-container","video-multi-question-options","video-multi-question-feedback"].forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
     clearTimer();
+    paused = false;
 
     const q = questions[qIndex];
     if (!q) { console.error(`Question ${qIndex} missing`); return finish(); }
     if (sceneText) sceneText.textContent = q.text || "";
 
-    // Timer
     const seconds = resolveTimerSeconds(scene, q);
+    let timerDiv = null;
     if (seconds && seconds > 0) {
       timeLeft = seconds;
-      const timerDiv = document.createElement("div");
+      timerDiv = document.createElement("div");
       timerDiv.id = "video-multi-question-timer";
       timerDiv.style.cssText = "font-weight:700;font-size:1.1rem;color:#00ffff;margin-top:10px;";
       timerDiv.textContent = `⏳ Time left: ${timeLeft}s`;
       game.appendChild(timerDiv);
 
       timerInterval = setInterval(() => {
-        timeLeft -= 1;
-        if (timerDiv) timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s`;
-        if (timeLeft <= 0) {
-          clearTimer();
-          // count a miss in cross-scene tally if enabled
-          try { if (scene.tallyKey && typeof tallyAdd === 'function') tallyAdd(scene.tallyKey, 0); } catch(_){}
-          feedback("⏲️ Time's up. Moving on...", "orange", false, true);
+        if (!paused) {
+          timeLeft -= 1;
+          renderTimer(timerDiv);
+          if (timeLeft <= 0) {
+            clearTimer();
+            try { if (scene.tallyKey && typeof tallyAdd === 'function') tallyAdd(scene.tallyKey, 0); } catch(_){}
+            feedback("⏲️ Time's up. Moving on...", "orange", false, true);
+          }
+        } else {
+          renderTimer(timerDiv);
         }
       }, 1000);
     }
 
-    // Options
+    const optionsWrap = document.createElement("div");
+    optionsWrap.style.cssText = "margin-top:15px";
+    game.appendChild(optionsWrap);
+
     const optionsDiv = document.createElement("div");
-    optionsDiv.id = "video-multi-question-options";
-    optionsDiv.style.marginTop = "15px";
-    game.appendChild(optionsDiv);
+    optionsDiv.id = "choices-container";              // speech hook target
+    optionsDiv.style.cssText = "display:flex;flex-direction:column;gap:8px;";
+    optionsWrap.appendChild(optionsDiv);
+
+    // let the hook know options are visible
+    try { document.dispatchEvent(new CustomEvent('choices-ready', { detail: { sceneId: id, qIndex } })); } catch {}
+
+    optionsDiv.setAttribute("data-legacy-id", "video-multi-question-options");
 
     const feedbackDiv = document.createElement("div");
     feedbackDiv.id = "video-multi-question-feedback";
@@ -5690,27 +6512,77 @@ regNode(video);
       setTimeout(() => { qIndex++; renderQuestion(); }, timedOut ? 900 : 700);
     }
 
-    const opts = Array.isArray(q.options) ? q.options.slice() : [];
-    const correctIndex = Number(q.correct);
+    let opts = Array.isArray(q.options)
+      ? q.options.map((opt, idx) => ({ text: (typeof opt === "string") ? opt : String(opt), __originIndex: idx }))
+      : [];
 
-    // optional shuffle
+    const rightTextFromQ = q.speechRightText ? String(q.speechRightText) : null;
+    const rightTextFromSceneArr = Array.isArray(scene.speechRightTexts) ? scene.speechRightTexts[qIndex] : null;
+    const speechRightText = rightTextFromQ || rightTextFromSceneArr || null;
+    const speechRightNorm = speechRightText ? normTxt(speechRightText) : null;
+
     if (scene.shuffleOptions) {
       for (let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
     }
 
+    let correctIndex = Number.isFinite(q.correct) ? Number(q.correct) : null;
+    if (speechRightNorm) {
+      for (const o of opts) {
+        if (normTxt(o.text) === speechRightNorm) { correctIndex = o.__originIndex; break; }
+      }
+    }
+
+    window.__choiceNextMap = window.__choiceNextMap || new WeakMap();
+
     opts.forEach((opt, i) => {
       const btn = document.createElement("button");
-      btn.textContent = (typeof opt === "string") ? opt : String(opt);
-      btn.style.cssText = "margin:5px;padding:8px 16px;font-weight:700;background:#00ffff;border:none;border-radius:8px;cursor:pointer";
+      btn.textContent = opt.text;
+      btn.className = "choice";
+      btn.dataset.index = String(i);
+      btn.dataset.originIndex = String(opt.__originIndex);
+
+      const isTextMatch = speechRightNorm && (normTxt(opt.text) === speechRightNorm);
+      const isIndexMatch = Number.isFinite(correctIndex) && (opt.__originIndex === correctIndex);
+      if (isTextMatch || isIndexMatch) btn.setAttribute("data-right", "1");
+
+      // 🔔 notify hooks that choices are ready (include Q index)
+try {
+  document.dispatchEvent(new CustomEvent('choices-ready', { detail: { sceneId: window.currentSceneId, type: 'video-multi-question', qIndex } }));
+} catch(_) {}
+
+// 🎤 arm speech for these choices (id="choices-container")
+try {
+  if (typeof window.__armSpeechForChoices === 'function') {
+    window.__armSpeechForChoices(document.getElementById('choices-container'));
+  }
+} catch(_) {}
+
+      // No per-option next for VMQ — keep WeakMap empty mapping
+      window.__choiceNextMap.set(btn, "");
+
+      btn.style.cssText = "text-align:left;margin:5px;padding:10px 12px;font-weight:700;background:#00ffff;border:none;border-radius:10px;cursor:pointer;color:#000";
       btn.onmouseenter = () => (btn.style.backgroundColor = "#00cccc");
       btn.onmouseleave = () => (btn.style.backgroundColor = "#00ffff");
       regListener(btn, "click", () => {
-        const ok = (i === correctIndex);
-        // cross-scene tally (optional)
+        const ok = (opt.__originIndex === correctIndex);
         try { if (scene.tallyKey && typeof tallyAdd === 'function') tallyAdd(scene.tallyKey, ok ? (scene.tallyWeight || 1) : 0); } catch(_){}
         feedback(ok ? "✅ Correct! Moving on..." : "❌ Not quite. Moving on...", ok ? "lightgreen" : "salmon", ok);
       });
+
       optionsDiv.appendChild(btn);
+    });
+
+    // Pause timer when mic activates
+    const micClickHandler = (ev) => {
+      const t = ev.target;
+      if (t && (t.id === "mc-speak-btn" || t.classList?.contains("speech-btn"))) {
+        try { window.SceneTimer?.pause?.(); } catch(_) {}
+      }
+    };
+    document.addEventListener("click", micClickHandler, { capture:true });
+
+    regCleanup(() => {
+      document.removeEventListener("click", micClickHandler, { capture:true });
     });
   }
 
@@ -5718,188 +6590,9 @@ regNode(video);
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mobile-safe VIDEO → MULTI *AUDIO* CHOICE (each option is an audio clip)
-// ─────────────────────────────────────────────────────────────────────────────
-function loadVideoMultiAudioChoiceScene(id) {
-  const scene = scenes[id];
-  if (!scene) { console.error(`Scene data not found for ID: ${id}`); return; }
 
-  const gameContainer = document.getElementById("game-container");
-  const sceneText = document.getElementById("scene-text");
-  const sceneImage = document.getElementById("scene-image");
-  const container = document.getElementById("scene-container");
 
-  [sceneImage, container].forEach(el => { if (el) { el.style.display = "none"; el.innerHTML = ""; } });
-  if (sceneText) { sceneText.style.display = "block"; sceneText.textContent = scene.text || ""; }
-  if (gameContainer) gameContainer.style.display = "block";
 
-  // Remove stale UI
-  const prevUI = document.getElementById("video-multi-audio-question-ui");
-  if (prevUI) prevUI.remove();
-  const oldVid = document.getElementById("scene-video");
-  if (oldVid) oldVid.remove();
-
-  // Video (mobile-safe)
-  const videoWrap = document.createElement("div");
-  videoWrap.style.cssText = "position:relative;max-width:100%;margin:0 auto 16px;";
-
-  const videoElem = document.createElement("video");
-  videoElem.id = "scene-video";
-  videoElem.controls = true;
-  videoElem.preload = "metadata";
-  videoElem.src = resolveSrc(scene.videoSrc);
-  if (scene.poster) videoElem.poster = resolveSrc(scene.poster);
-  videoElem.style.cssText = "width:100%;height:auto;max-height:45vh;display:block;border-radius:12px;background:#000;";
-  videoElem.setAttribute("playsinline", "");
-  videoElem.setAttribute("webkit-playsinline", "");
-  videoElem.playsInline = true;
-
-  const playOverlay = document.createElement("button");
-  playOverlay.textContent = "▶ Tap to Play";
-  playOverlay.style.cssText = "position:absolute;inset:auto 0 0 0;margin:auto;top:0;bottom:0;width:180px;height:48px;" +
-                              "background:#00ffff;color:#000;border:none;border-radius:10px;font-weight:700;cursor:pointer";
-  playOverlay.onclick = async () => {
-    try { await videoElem.play(); playOverlay.remove(); } catch(e) { console.warn("User play failed:", e); }
-  };
-  videoElem.addEventListener("play", () => playOverlay.remove());
-
-  videoElem.addEventListener("error", () => {
-    const msg = document.createElement("div");
-    msg.style.cssText = "margin-top:8px;color:orange;font-weight:700";
-    msg.textContent = "⚠️ This device can’t play the video inline.";
-    const a = document.createElement("a");
-    a.href = resolveSrc(scene.videoSrc);
-    a.target = "_blank";
-    a.textContent = "Open video in a new tab";
-    a.style.cssText = "display:inline-block;margin-left:8px;color:#0ff;text-decoration:underline";
-    msg.appendChild(a);
-    videoWrap.appendChild(msg);
-  });
-
-  // Optional SKIP button
-  const skipBtn = document.createElement("button");
-  skipBtn.textContent = "Skip video";
-  skipBtn.style.cssText = "margin-top:8px;padding:8px 12px;border:none;border-radius:8px;background:#222;color:#eee;cursor:pointer;font-weight:700";
-  skipBtn.onclick = () => showQuestion();
-  videoWrap.appendChild(skipBtn);
-
-  videoWrap.appendChild(videoElem);
-  videoWrap.appendChild(playOverlay);
-  gameContainer.appendChild(videoWrap);
-
-  // Question UI (hidden until video ends or skip)
-  let questionUI = document.createElement("div");
-  questionUI.id = "video-multi-audio-question-ui";
-  questionUI.style.maxWidth = "700px";
-  questionUI.style.margin = "0 auto";
-  questionUI.style.color = "#eee";
-  questionUI.style.fontSize = "1.1rem";
-  questionUI.style.display = "none";
-  gameContainer.appendChild(questionUI);
-
-  let index = 0;
-  let score = 0;
-
-  function cleanupQuestionUI() {
-    questionUI.style.display = "none";
-    questionUI.innerHTML = "";
-  }
-
-  function finishBlock() {
-    cleanupQuestionUI();
-    try { videoElem.pause(); } catch(_) {}
-    if (videoWrap.parentNode) videoWrap.remove();
-
-    if (scene.scoring && scene.endings) {
-      let endingScene;
-      if (score >= scene.scoring.high) endingScene = scene.endings.high;
-      else if (score >= scene.scoring.medium) endingScene = scene.endings.medium;
-      else endingScene = scene.endings.low;
-      if (endingScene) return loadScene(endingScene);
-    }
-    if (scene.next) return loadScene(scene.next);
-    console.warn("video-multi-audio-choice: no next/endings specified.");
-  }
-
-  function showQuestion() {
-    // hide video area once questions start
-    videoWrap.style.display = "none";
-
-    if (index >= (scene.questions?.length || 0)) return finishBlock();
-
-    const question = scene.questions[index];
-    questionUI.style.display = "block";
-    questionUI.innerHTML = `
-      <p><strong>Question ${index + 1}:</strong> ${question.text || ""}</p>
-      <div id="audio-options-container" style="margin-top: 12px;"></div>
-      <div id="video-multi-audio-feedback" style="margin-top: 10px; font-weight: bold;"></div>
-    `;
-
-    const optionsContainer = document.getElementById("audio-options-container");
-    const feedbackDiv = document.getElementById("video-multi-audio-feedback");
-
-    optionsContainer.innerHTML = "";
-
-    (question.options || []).forEach((audioSrc, i) => {
-      const optionLabel = document.createElement("label");
-      optionLabel.style.display = "block";
-      optionLabel.style.marginBottom = "12px";
-      optionLabel.style.cursor = "pointer";
-
-      const radio = document.createElement("input");
-      radio.type = "radio";
-      radio.name = "audio-choice";
-      radio.value = i;
-      radio.style.marginRight = "10px";
-
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.preload = "metadata";
-      audio.src = resolveSrc(audioSrc);
-      audio.style.verticalAlign = "middle";
-
-      optionLabel.appendChild(radio);
-      optionLabel.appendChild(audio);
-      optionsContainer.appendChild(optionLabel);
-    });
-
-    // Submit button (fresh each q)
-    let submitBtn = document.getElementById("video-multi-audio-submit-btn");
-    if (submitBtn) submitBtn.remove();
-
-    submitBtn = document.createElement("button");
-    submitBtn.id = "video-multi-audio-submit-btn";
-    submitBtn.textContent = "Submit Answer";
-    submitBtn.style.cssText = "margin-top: 15px; padding: 8px 16px; font-weight: 700; background: #00ffff; border: none; border-radius: 8px; cursor: pointer";
-    submitBtn.onmouseover = () => (submitBtn.style.backgroundColor = "#00cccc");
-    submitBtn.onmouseout  = () => (submitBtn.style.backgroundColor = "#00ffff");
-    questionUI.appendChild(submitBtn);
-
-    submitBtn.onclick = () => {
-      const selected = document.querySelector('input[name="audio-choice"]:checked');
-      if (!selected) {
-        feedbackDiv.textContent = "⚠️ Please select an answer.";
-        feedbackDiv.style.color = "orange";
-        return;
-      }
-      const answerIndex = parseInt(selected.value, 10);
-      if (answerIndex === question.correct) {
-        score++;
-        feedbackDiv.textContent = "✅ Correct! Moving on...";
-        feedbackDiv.style.color = "lightgreen";
-      } else {
-        feedbackDiv.textContent = "❌ Not quite. Moving on...";
-        feedbackDiv.style.color = "salmon";
-      }
-      submitBtn.disabled = true;
-      setTimeout(() => { index++; showQuestion(); }, 900);
-    };
-  }
-
-  // Start questions after video ends (or on Skip)
-  videoElem.addEventListener("ended", showQuestion);
-}
 // ─────────────────────────────────────────────────────────────────────────────
 // Video → Scramble scene (inline-safe + GitHub Pages-safe URLs)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -6240,169 +6933,233 @@ function loadVideoFillBlankScene(id) {
   regListener(video, "ended", startFIB);
 }
 
+// replace your current loadVideoChoiceScene with this updated version
 function loadVideoChoiceScene(id) {
-  const scene = scenes[id];
-  if (!scene) { console.error(`Scene ${id} not found.`); return; }
+  const scene = (window.scenes || {})[id];
+  if (!scene) { console.error(`video-choice: scene "${id}" not found`); return; }
 
-  // Safe shorthands (don’t break if helpers aren’t present)
-  const regNode     = window.registerNode     || function(){};
-  const regListener = window.registerListener || function(t,e,h){ t.addEventListener(e,h); };
-  const regCleanup  = window.registerCleanup  || function(){};
-
-  const game = document.getElementById("game-container");
-  const sceneText = document.getElementById("scene-text");
+  const game       = document.getElementById("game-container");
+  const sceneText  = document.getElementById("scene-text");
   const sceneImage = document.getElementById("scene-image");
-
-  // Hide unrelated UI
-  [sceneImage].forEach(el => { if (el) { el.style.display = "none"; el.innerHTML = ""; }});
-  if (sceneText) { sceneText.style.display = "none"; sceneText.textContent = ""; }
   if (game) game.style.display = "block";
+  if (sceneText) { sceneText.style.display = "none"; sceneText.innerHTML = ""; }
+  if (sceneImage) { sceneImage.style.display = "none"; sceneImage.innerHTML = ""; }
 
-  // Remove any prior instance
-  const stale = document.getElementById("vc-wrap");
-  if (stale) stale.remove();
+  // Clear stale UI
+  ["scene-video","video-choices","video-choices-timer","video-choices-feedback"].forEach(id => {
+    const n = document.getElementById(id); if (n) n.remove();
+  });
 
-  // Wrapper
-  const wrap = document.createElement("div");
-  wrap.id = "vc-wrap";
-  wrap.style.cssText = "max-width:840px;margin:0 auto;padding:8px;";
-  regNode(wrap);
-  game.appendChild(wrap);
-
-  // Video
+  // Build video
   const video = document.createElement("video");
-  video.id = "vc-video";
-  video.controls = true;               // user-controlled (avoids autoplay policies)
+  video.id = "scene-video";
+  video.controls = true;
   video.preload = "metadata";
-  video.playsInline = true;            // iOS inline
-  video.setAttribute("webkit-playsinline","true");
-  video.muted = false;                 // don’t trigger autoplay attempts
-  video.src = scene.videoSrc || "";
-  video.style.cssText = "width:100%;max-height:45vh;border-radius:12px;background:#000;display:block;margin:0 auto;";
-  wrap.appendChild(video);
+  video.src = (typeof resolveSrc === "function") ? resolveSrc(scene.videoSrc) : (scene.videoSrc || "");
+  if (scene.poster) video.poster = (typeof resolveSrc === "function") ? resolveSrc(scene.poster) : scene.poster;
+  video.playsInline = true;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.style.cssText = "width:100%;height:auto;max-height:45vh;display:block;border-radius:12px;background:#000;margin:0 auto 12px;";
+  game.appendChild(video);
 
-  // “Tap to play” overlay to guarantee a user gesture
-  const overlay = document.createElement("button");
-  overlay.id = "vc-overlay";
-  overlay.textContent = "▶ Tap to play";
-  overlay.style.cssText = `
-    position:relative; display:block; width:100%;
-    margin:10px auto 0; padding:10px 14px;
-    border:none; border-radius:10px;
-    background:#00ffff; color:#000; font-weight:700; cursor:pointer;
-  `;
-  wrap.appendChild(overlay);
+  // State
+  let timerId = null, timeLeft = 0, paused = false;
 
-  // Choice panel (hidden until video ends or user skips)
-  const panel = document.createElement("div");
-  panel.id = "vc-panel";
-  panel.style.cssText = "display:none;margin-top:12px;";
-  wrap.appendChild(panel);
+  function clearTimer(){ if (timerId) { clearInterval(timerId); timerId = null; } }
+  function renderTimer(div){ if (div) div.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s${paused?' (paused)':''}`; }
 
-  // Timer
-  const timerDiv = document.createElement("div");
-  timerDiv.id = "vc-timer";
-  timerDiv.style.cssText = "font-weight:700;font-size:1.05rem;color:#00ffff;margin:6px 0;";
-  panel.appendChild(timerDiv);
+  function startChoices() {
+    // Disarm video so it won’t steal focus
+    try { video.pause(); } catch(_) {}
+    try { video.currentTime = 0; } catch(_) {}
+    video.removeAttribute("controls");
+    video.style.pointerEvents = "none";
+    video.style.opacity = "0.25";
 
-  // Options
-  const opts = document.createElement("div");
-  opts.id = "vc-choices";
-  opts.style.cssText = "display:flex;flex-direction:column;gap:8px;margin-top:8px;";
-  panel.appendChild(opts);
-
-  // Feedback
-  const fb = document.createElement("div");
-  fb.id = "vc-feedback";
-  fb.style.cssText = "margin-top:10px;font-weight:700;";
-  panel.appendChild(fb);
-
-  // Build choices
-  (scene.choices || []).forEach(choice => {
-    const btn = document.createElement("button");
-    btn.textContent = choice.text || "";
-    btn.style.cssText = "text-align:left;padding:10px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
-    btn.onmouseenter = () => (btn.style.background = "#00cccc");
-    btn.onmouseleave = () => (btn.style.background = "#00ffff");
-    regListener(btn, "click", () => {
-      clearTimer();
-      fb.textContent = "→";
-      fb.style.color = "#aaa";
-      loadScene(choice.next);
+    // Remove old panel if any
+    ["video-choices","video-choices-timer","video-choices-feedback"].forEach(id => {
+      const n = document.getElementById(id); if (n) n.remove();
     });
-    opts.appendChild(btn);
-  });
 
-  // Timer logic (starts AFTER video ends or when user skips)
-  const DEFAULT_SECONDS = 15;
-  let timeLeft = 0;
-  let iv = null;
+    // Timer (scene.timer may be true | number | undefined)
+    const VMQ_DEFAULT_SECONDS = 15;
+    const seconds = (scene.timer === true) ? VMQ_DEFAULT_SECONDS
+                  : (Number.isFinite(scene.timer) && scene.timer > 0) ? Math.floor(scene.timer)
+                  : null;
 
-  function clearTimer() {
-    if (iv) { clearInterval(iv); iv = null; }
-  }
-  function startTimer() {
-    const sec = (scene.timer === true)
-      ? DEFAULT_SECONDS
-      : (Number.isFinite(scene.timer) ? Number(scene.timer) : DEFAULT_SECONDS);
-    timeLeft = sec;
-    timerDiv.textContent = `⏳ Time left: ${timeLeft}s`;
-    iv = setInterval(() => {
-      timeLeft -= 1;
-      timerDiv.textContent = `⏳ Time left: ${Math.max(0,timeLeft)}s`;
-      if (timeLeft <= 0) {
-        clearTimer();
-        fb.textContent = "⏲️ Time's up. Returning...";
-        fb.style.color = "orange";
-        const to = scene.timeoutNext || scene.next || null;
-        setTimeout(() => { if (to) loadScene(to); }, 800);
-      }
-    }, 1000);
-  }
+    let timerDiv = null;
+    if (seconds) {
+      timeLeft = seconds;
+      timerDiv = document.createElement("div");
+      timerDiv.id = "video-choices-timer";
+      timerDiv.style.cssText = "font-weight:700;font-size:1.05rem;color:#00ffff;margin:8px 0;";
+      game.appendChild(timerDiv);
+      renderTimer(timerDiv);
 
-  function revealPanelAndStartTimer() {
-    panel.style.display = "block";
-    startTimer();
-  }
-
-  // Play flow — only on explicit tap
-  regListener(overlay, "click", async () => {
-    overlay.disabled = true;
-    try {
-      await video.play();            // user gesture → should be allowed
-      overlay.remove();              // playing OK
-    } catch (err) {
-      // If play still fails, show graceful fallback: show choices + timer immediately
-      console.warn("[video-choice] play() rejected:", err);
-      overlay.textContent = "▶ Open video in a new tab";
-      overlay.disabled = false;
-      overlay.onclick = () => window.open(video.src, "_blank");
-
-      // Also add a Skip button
-      const skip = document.createElement("button");
-      skip.textContent = "Skip video";
-      skip.style.cssText = "margin-left:8px;padding:10px 14px;border:none;border-radius:10px;background:#222;color:#eee;font-weight:700;cursor:pointer";
-      overlay.parentNode.insertBefore(skip, overlay.nextSibling);
-      skip.onclick = () => {
-        overlay.remove();
-        skip.remove();
-        revealPanelAndStartTimer();
-      };
+      clearTimer();
+      timerId = setInterval(() => {
+        if (!paused) {
+          timeLeft -= 1;
+          renderTimer(timerDiv);
+          if (timeLeft <= 0) {
+            clearTimer();
+            const timeoutDest = scene.timeoutNext || scene.next;
+            if (timeoutDest) return loadScene(timeoutDest);
+          }
+        } else {
+          renderTimer(timerDiv);
+        }
+      }, 1000);
     }
-  });
 
-  // When the video ends → reveal panel and start timer
-  regListener(video, "ended", () => {
-    revealPanelAndStartTimer();
-  });
+    // SceneTimer API for speech hook
+    const prevSceneTimer = window.SceneTimer;
+    const sceneTimerAPI = {
+      pause:  () => { paused = true;  renderTimer(timerDiv); },
+      resume: () => { paused = false; renderTimer(timerDiv); },
+      isPaused: () => paused,
+      getTimeLeft: () => timeLeft,
+      _clear: () => clearTimer()
+    };
+    window.SceneTimer = sceneTimerAPI;
 
-  // Cleanup on leave
-  regCleanup(() => {
-    clearTimer();
-    const w = document.getElementById("vc-wrap");
-    if (w) w.remove();
-  });
+    // Pause/resume timer on speech lifecycle
+    const onSpeechStart  = () => { try { window.SceneTimer?.pause?.(); } catch(_) {} };
+    const onSpeechFinish = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+    const onSpeechCancel = () => { try { window.SceneTimer?.resume?.(); } catch(_) {} };
+    document.addEventListener('speech-start',  onSpeechStart);
+    document.addEventListener('speech-finish', onSpeechFinish);
+    document.addEventListener('speech-cancel', onSpeechCancel);
+
+    // Choices wrap
+    const wrap = document.createElement("div");
+    wrap.id = "video-choices";
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:10px;margin:10px 0;";
+    game.appendChild(wrap);
+
+    const mcHost = document.createElement("div");
+    mcHost.id = "choices-container"; // <- speech hook looks here
+    mcHost.style.cssText = "display:flex;flex-direction:column;gap:8px;";
+    wrap.appendChild(mcHost);
+
+    const fb = document.createElement("div");
+    fb.id = "video-choices-feedback";
+    fb.style.cssText = "margin-top:6px;font-weight:700;";
+    game.appendChild(fb);
+
+    // Build buttons (shuffle-safe tagging)
+    const norm = (s) => String(s||'')
+      .toLowerCase()
+      .replace(/[\u2018\u2019]/g,"'")
+      .replace(/[\u201C\u201D]/g,'"')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    let choices = Array.isArray(scene.choices) ? scene.choices.slice() : [];
+    const speechRightNorm = scene.speechRightText ? norm(scene.speechRightText) : null;
+
+    // Preserve origin index for mapping
+    choices = choices.map((c, i) => ({ ...c, __originIndex: i }));
+    if (scene.shuffleOptions) {
+      for (let i=choices.length-1; i>0; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+      }
+    }
+
+    window.__choiceNextMap = window.__choiceNextMap || new WeakMap();
+
+    choices.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "choice";
+      btn.textContent = opt.text;
+      btn.dataset.originIndex = String(opt.__originIndex);
+      if (opt.next) btn.dataset.next = opt.next;                  // <-- critical
+      // WeakMap target for speech fallback
+      try { window.__choiceNextMap.set(btn, opt.next || ""); } catch{ }
+
+      // Tag right by text match (for speech “right” cue), *navigation* still uses next
+      if (speechRightNorm && norm(opt.text) === speechRightNorm) {
+        btn.setAttribute("data-right", "1");
+      }
+
+      btn.style.cssText = "text-align:left;padding:10px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
+      btn.onmouseenter = () => (btn.style.background = "#00cccc");
+      btn.onmouseleave = () => (btn.style.background = "#00ffff");
+      btn.onclick = () => {
+        clearTimer();
+        if (opt.applyCrm) { try { window.crm && window.crm.apply(opt.applyCrm); } catch(_){} }
+        if (opt.next) return loadScene(opt.next);
+      };
+      mcHost.appendChild(btn);
+    });
+
+    try {
+  document.dispatchEvent(new CustomEvent('choices-ready', { detail:{ sceneId: window.currentSceneId } }));
+} catch(_){}
+
+    // Let the speech hook know choices are ready
+    try { document.dispatchEvent(new CustomEvent('choices-ready', { detail: { sceneId: id } })); } catch {}
+
+    // Last-ditch reconciliation: ensure every button ends up with a resolvable next
+    (function reconcileChoiceNexts() {
+      const btns = mcHost.querySelectorAll('.choice');
+      const model = (Array.isArray(scene.choices) ? scene.choices : []).map(c => ({
+        head: norm(String(c.text || '').slice(0,120)),
+        next: c.next || ''
+      }));
+      btns.forEach((b) => {
+        let target = b.getAttribute('data-next') || (window.__choiceNextMap && window.__choiceNextMap.get(b)) || '';
+        if (!target) {
+          const oi = Number(b.getAttribute('data-originIndex'));
+          if (Number.isFinite(oi) && scene.choices && scene.choices[oi] && scene.choices[oi].next) {
+            target = scene.choices[oi].next;
+          }
+        }
+        if (!target) {
+          const head = norm((b.textContent || '').slice(0,120));
+          const hit = model.find(m => m.head && (head.startsWith(m.head) || m.head.startsWith(head) || head.includes(m.head) || m.head.includes(head)));
+          if (hit && hit.next) target = hit.next;
+        }
+        if (target) {
+          b.setAttribute('data-next', target);
+          try { window.__choiceNextMap.set(b, target); } catch {}
+        }
+      });
+    })();
+
+    // Cleanup when leaving scene
+    registerCleanup(() => {
+      clearTimer();
+      document.removeEventListener('speech-start',  onSpeechStart);
+      document.removeEventListener('speech-finish', onSpeechFinish);
+      document.removeEventListener('speech-cancel', onSpeechCancel);
+      try {
+        if (window.SceneTimer === sceneTimerAPI) {
+          if (prevSceneTimer) window.SceneTimer = prevSceneTimer; else delete window.SceneTimer;
+        }
+      } catch {}
+      const ids = ["video-choices","video-choices-timer","video-choices-feedback"];
+      ids.forEach(x => { const n = document.getElementById(x); if (n) n.remove(); });
+    });
+  }
+
+  // Start choices when video ends (or immediately if no videoSrc)
+  video.addEventListener("ended", startChoices);
+  if (!scene.videoSrc) startChoices(); // safety
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6413,9 +7170,8 @@ function loadHangmanScene(id) {
   const scene = scenes[id];
   if (!scene) { console.error(`Scene ${id} not found.`); return; }
 
-  // Pre-clean any previous hangman instance + key handler
-  const stale = document.getElementById('hangman');
-  if (stale) stale.remove();
+  // Clean prior instance
+  document.getElementById('hangman')?.remove();
   if (window.__hmKeyHandler) {
     document.removeEventListener('keydown', window.__hmKeyHandler);
     window.__hmKeyHandler = null;
@@ -6433,10 +7189,9 @@ function loadHangmanScene(id) {
   }
   if (gameContainer) gameContainer.style.display = "block";
 
-  const oldVideo = document.getElementById("scene-video");
-  if (oldVideo) { oldVideo.pause(); oldVideo.src = ""; oldVideo.load(); oldVideo.remove(); }
-  let audioElem = document.getElementById("scene-audio");
-  if (audioElem) { audioElem.pause(); audioElem.src = ""; audioElem.load(); audioElem.remove(); }
+  // Kill any media from prior scenes
+  document.getElementById("scene-video")?.remove();
+  document.getElementById("scene-audio")?.remove();
 
   // Config
   const rawTarget = scene.target || "";
@@ -6456,8 +7211,7 @@ function loadHangmanScene(id) {
   wrap.style.margin = "0 auto";
   wrap.style.padding = "12px 8px";
   wrap.style.textAlign = "center";
-  wrap.style.color = "var(--text-default)"; // strong dark text on white
-
+  wrap.style.color = "#eee";
 
   wrap.innerHTML = `
     <div id="hm-header" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -6466,7 +7220,7 @@ function loadHangmanScene(id) {
     </div>
 
     <div id="hm-word"
-         style="margin:18px 0;font:700 28px/1.4 system-ui,Segoe UI,Arial,Helvetica,Apple Color Emoji,Segoe UI Emoji;letter-spacing:.08em;"></div>
+      style="margin:18px 0;font:700 28px/1.4 system-ui,Segoe UI,Arial,Helvetica,Apple Color Emoji,Segoe UI Emoji;letter-spacing:.08em;"></div>
 
     <div id="hm-letters" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;"></div>
 
@@ -6487,7 +7241,7 @@ function loadHangmanScene(id) {
   const ctrlEl = wrap.querySelector("#hm-ctrl");
 
   // Helpers
-  function isLetter(ch) { return /[A-Z]/.test(ch); }
+  function isLetter(ch) { return /^[A-Z]$/.test(ch); }
   function displayWord() {
     const out = [];
     for (const ch of target) out.push(isLetter(ch) ? (guessed.has(ch) ? ch : "_") : ch);
@@ -6525,14 +7279,12 @@ function loadHangmanScene(id) {
     disableAll();
     ctrlEl.innerHTML = "";
 
-    // Retry is okay to keep here
     const retry = document.createElement("button");
     retry.textContent = "Retry";
     retry.style.marginRight = "8px";
     retry.onclick = () => loadScene(id);
     ctrlEl.appendChild(retry);
 
-    // 👇 Hub button ONLY if NOT suppressed
     if (!scene.suppressHub) {
       const back = document.createElement("button");
       back.textContent = "Back to Hub";
@@ -6540,7 +7292,6 @@ function loadHangmanScene(id) {
       ctrlEl.appendChild(back);
     }
 
-    // Continue to remedial if provided
     if (scene.onLoseNext) {
       const nextBtn = document.createElement("button");
       nextBtn.textContent = "Continue";
@@ -6551,13 +7302,12 @@ function loadHangmanScene(id) {
   }
 
   function guessLetter(letter) {
-    if (guessed.has(letter) || solved) return;
-    guessed.add(letter);
+    const L = String(letter || "").toUpperCase();
+    if (!alphabet.includes(L) || guessed.has(L) || solved) return;
+    guessed.add(L);
+    lettersEl.querySelector(`button[data-letter="${L}"]`)?.setAttribute('disabled','');
 
-    const btn = lettersEl.querySelector(`button[data-letter="${letter}"]`);
-    if (btn) btn.disabled = true;
-
-    if (target.includes(letter)) {
+    if (target.includes(L)) {
       displayWord();
       if (allRevealed()) finishWin();
     } else {
@@ -6579,11 +7329,313 @@ function loadHangmanScene(id) {
     lettersEl.appendChild(b);
   });
 
-  // Keyboard support
-  if (window.__hmKeyHandler) {
-    document.removeEventListener('keydown', window.__hmKeyHandler);
-    window.__hmKeyHandler = null;
+  // ====== Speech helpers (EN-focused) ======
+  const SF = window.SpeechFeature || {};
+  const LetterNames = new Map((()=>{
+    const add = (m,L,arr)=>arr.forEach(a=>m.set(a,L));
+    const m = new Map();
+    // English letter names + common variants
+    add(m,'A',['a','ay','eh']); add(m,'B',['b','bee','be']); add(m,'C',['c','cee','see']);
+    add(m,'D',['d','dee','di']); add(m,'E',['e','ee','ih']); add(m,'F',['f','ef','eff']);
+    add(m,'G',['g','gee','ji']); add(m,'H',['h','aitch']); add(m,'I',['i','eye','ai','aye']);
+    add(m,'J',['j','jay','jei']); add(m,'K',['k','kay','kei']); add(m,'L',['l','el','ell']);
+    add(m,'M',['m','em','emm']); add(m,'N',['n','en','enn']); add(m,'O',['o','oh','ou']);
+    add(m,'P',['p','pee','pea']); add(m,'Q',['q','cue','queue']); add(m,'R',['r','ar','are']);
+    add(m,'S',['s','ess','es']); add(m,'T',['t','tee','ti']); add(m,'U',['u','you','yu']);
+    add(m,'V',['v','vee','vi']); add(m,'W',['w','double u','double-you','doubleu']);
+    add(m,'X',['x','ex','eks']); add(m,'Y',['y','why']); add(m,'Z',['z','zed','zee']);
+    // NATO (English)
+    const NATO = {
+      A:['alpha'],B:['bravo'],C:['charlie'],D:['delta'],E:['echo'],F:['foxtrot'],G:['golf'],
+      H:['hotel'],I:['india'],J:['juliett','juliet'],K:['kilo'],L:['lima'],M:['mike'],
+      N:['november'],O:['oscar'],P:['papa'],Q:['quebec'],R:['romeo'],S:['sierra'],
+      T:['tango'],U:['uniform'],V:['victor'],W:['whiskey','whisky'],X:['xray','x-ray'],
+      Y:['yankee'],Z:['zulu']
+    };
+    Object.entries(NATO).forEach(([L,arr])=>arr.forEach(a=>m.set(a,L)));
+    return m;
+  })());
+
+  function norm(s){
+    return String(s||'').toLowerCase()
+      .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+      .replace(/[^a-z0-9\s'-]/gi,' ').replace(/\s+/g,' ').trim();
   }
+
+  function buildLetterGrammar() {
+    const JSGF_HEADER = '#JSGF V1.0;';
+    const letters = 'a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z';
+    const names = Array.from(new Set([...LetterNames.keys()])).join(' | ');
+    const phrase =
+      '(letter ( ' + letters + ' | ' + names + ' )) | ' +
+      '(( ' + letters + ' ) for ( ' + names + ' )) | ' +
+      '(' + letters + ') | (' + names + ') | ' +
+      '(' + letters.split(' | ').map(ch => `'${ch}`).join(' | ') + ')';
+    return `${JSGF_HEADER}
+grammar hangman;
+public <choice> = ${phrase} ;`;
+  }
+
+  function listenLetterFirst(onDone) {
+    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Rec) { onDone({heard:'', alts:[], empty:true}); return; }
+
+    const rec = new Rec();
+    const SGL = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+    if (SGL) {
+      const list = new SGL();
+      list.addFromString(buildLetterGrammar(), 1.0);
+      rec.grammars = list;
+    }
+    rec.lang = (SF.settings?.lang) || 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 20;
+
+    let best = '', list = [];
+    rec.onresult = (e) => {
+      const arr = Array.from(e.results?.[0] || []);
+      list = arr;
+      best = (arr.sort((a,b)=>(b.confidence||0)-(a.confidence||0))[0]?.transcript || '').trim();
+    };
+    rec.onerror = () => onDone({heard:best, alts:list, error:true});
+    rec.onend   = () => onDone({heard:best, alts:list});
+
+    try { rec.start(); } catch { onDone({heard:'', alts:[], error:true}); }
+  }
+
+  function listenFree(onDone){
+    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Rec) { onDone({heard:'', alts:[], empty:true}); return; }
+    const rec = new Rec();
+    rec.lang = (SF.settings?.lang) || 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 30;
+
+    let best = '', list = [];
+    rec.onresult = (e) => {
+      const arr = Array.from(e.results?.[0] || []);
+      list = arr;
+      best = (arr.sort((a,b)=>(b.confidence||0)-(a.confidence||0))[0]?.transcript || '').trim();
+    };
+    rec.onerror = () => onDone({heard:best, alts:list, error:true});
+    rec.onend   = () => onDone({heard:best, alts:list});
+
+    try { rec.start(); } catch { onDone({heard:'', alts:[], error:true}); }
+  }
+
+  function editDistance(a, b) {
+    a = String(a||''); b = String(b||'');
+    const m = a.length, n = b.length;
+    if (!m) return n; if (!n) return m;
+    const dp = new Array(n+1);
+    for (let j=0;j<=n;j++) dp[j]=j;
+    for (let i=1;i<=m;i++){
+      let prev=dp[0]; dp[0]=i;
+      for (let j=1;j<=n;j++){
+        const t=dp[j];
+        dp[j]=Math.min(dp[j]+1, dp[j-1]+1, prev + (a[i-1]===b[j-1]?0:1));
+        prev=t;
+      }
+    }
+    return dp[n];
+  }
+
+  function pickLetterFromTranscript(heard, alts){
+    const seq = [heard, ...(Array.isArray(alts)?alts.map(a=>a?.transcript||''):[])].map(norm).filter(Boolean);
+    const letterRE = /^[a-z]$/i;
+    const targetClean = target.replace(/[^A-Z]/g,'');
+    const targetSet = new Set(targetClean.split(''));
+
+    // explicit "letter X"
+    for (const h of seq){
+      const m = h.match(/\bletter\s+([a-z])\b/);
+      if (m) return { letter: m[1].toUpperCase(), word:false };
+    }
+    // letter names anywhere in phrase
+    for (const h of seq){
+      const toks = h.split(' ').filter(Boolean);
+      for (const tok of toks){
+        if (letterRE.test(tok)) return { letter: tok.toUpperCase(), word:false };
+        const L = LetterNames.get(tok);
+        if (L) return { letter: L, word:false };
+      }
+    }
+    // single token = letter name
+    for (const h of seq){
+      const toks = h.split(' ');
+      if (toks.length===1){
+        const tok = toks[0];
+        if (letterRE.test(tok)) return { letter: tok.toUpperCase(), word:false };
+        const L = LetterNames.get(tok);
+        if (L) return { letter: L, word:false };
+      }
+    }
+    // “X for X-ray”
+    for (const h of seq){
+      const m = h.match(/\b([a-z])\b\s+(?:for)\s+([a-z-]+)/i);
+      if (m){
+        const raw = m[1].toUpperCase();
+        const cue = LetterNames.get(norm(m[2]));
+        if (cue && cue === raw) return { letter: raw, word:false };
+      }
+    }
+    // spelled sequences → first unseen
+    for (const h of seq){
+      const toks = h.split(' ');
+      let seqLetters = [];
+      for (const t of toks){
+        if (letterRE.test(t)) seqLetters.push(t.toUpperCase());
+        else {
+          const L = LetterNames.get(t);
+          if (L) seqLetters.push(L);
+          else { seqLetters = []; break; }
+        }
+      }
+      if (seqLetters.length){
+        for (const L of seqLetters){
+          if (alphabet.includes(L) && !guessed.has(L)) return { letter:L, word:false };
+        }
+      }
+    }
+    // single squeezed char
+    for (const h of seq){
+      const squeezed = h.replace(/[^a-z]/g,'').toUpperCase();
+      if (squeezed.length===1 && alphabet.includes(squeezed) && !guessed.has(squeezed)){
+        return { letter:squeezed, word:false };
+      }
+    }
+    // strong single-token word guess
+    for (const h of seq){
+      const toks = h.split(' ').filter(Boolean);
+      if (toks.length===1 && toks[0].length>1){
+        const cand = toks[0].toUpperCase().replace(/[^A-Z]/g,'');
+        if (!cand) continue;
+        const dist = editDistance(cand, targetClean);
+        if (cand===targetClean || dist <= (targetClean.length>=6?2:1)) return { word:true };
+      }
+    }
+    return null;
+  }
+
+  // ===== Hangman mic (single button) =====
+  document.getElementById('hm-mic')?.remove();
+  document.getElementById('hangman-speak-btn')?.remove();
+
+  const micRow = document.createElement('div');
+  micRow.style.cssText = "margin:10px 0; display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap;";
+  const hint = document.createElement('div');
+  hint.textContent = 'Say “C”, “Charlie”, or the full word.';
+  hint.style.cssText = "opacity:.8; font-size:.9em;";
+  const micBtn = document.createElement('button');
+  micBtn.id = 'hm-mic';
+  micBtn.className = 'speech-btn';
+  micBtn.textContent = '🎙️ Say a letter / word';
+  micBtn.style.cssText = "padding:8px 12px; font-weight:700;";
+  micRow.appendChild(micBtn);
+  micRow.appendChild(hint);
+  ctrlEl.appendChild(micRow);
+
+  function disambiguate(cands){
+    const uiOld = ctrlEl.querySelector('#hm-ask'); uiOld?.remove();
+    const ui = document.createElement('div');
+    ui.id = 'hm-ask';
+    ui.style.cssText = 'margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;';
+    const msg = document.createElement('div'); msg.textContent = 'Did you mean:'; msg.style.opacity='.85';
+    ui.appendChild(msg);
+    cands.slice(0,4).forEach(L=>{
+      const b = document.createElement('button');
+      b.textContent = L;
+      b.style.cssText = 'min-width:34px;padding:8px;border-radius:8px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer';
+      b.onclick = ()=>{ ui.remove(); guessLetter(L); finish(); };
+      ui.appendChild(b);
+    });
+    const cancel = document.createElement('button');
+    cancel.textContent = 'Cancel';
+    cancel.style.cssText = 'padding:6px 10px;border-radius:8px;border:1px solid #2b3038;background:#1e2127;color:#eaeaea;cursor:pointer';
+    cancel.onclick = ()=>{ ui.remove(); finish(); };
+    ui.appendChild(cancel);
+    ctrlEl.appendChild(ui);
+  }
+
+  function finish(){
+    micBtn.disabled = false;
+    micBtn.textContent = '🎙️ Say a letter / word';
+    try { window.SceneTimer?.resume(); } catch{}
+  }
+
+  function preferTargets(cands){
+    const targetSet = new Set(target.replace(/[^A-Z]/g,'').split(''));
+    const V = new Set(['A','E','I','O','U']);
+    return [...new Set(cands)]
+      .map(L => {
+        let s = 0;
+        if (targetSet.has(L)) s += 2;
+        if (!guessed.has(L)) s += 1.2;
+        if (V.has(L)) s += 0.1;
+        return {L,s};
+      })
+      .sort((a,b)=>b.s-a.s)
+      .map(x=>x.L);
+  }
+
+  let busy = false;
+  micBtn.addEventListener('click', () => {
+    if (busy) return; busy = true;
+    micBtn.disabled = true; micBtn.textContent = '🎙️ Listening…';
+    try { window.SceneTimer?.pause(); } catch{}
+
+    const handlePick = (pick) => {
+      if (pick?.letter && !guessed.has(pick.letter)) { guessLetter(pick.letter); busy=false; finish(); return true; }
+      if (pick?.word === true) {
+        for (const ch of target) if (/[A-Z]/.test(ch)) guessed.add(ch);
+        displayWord(); if (allRevealed()) finishWin();
+        busy=false; finish(); return true;
+      }
+      return false;
+    };
+
+    const propose = (tokens) => {
+      const rawLetters = [];
+      tokens.forEach(h => {
+        h.split(' ').forEach(t => {
+          const mapped = LetterNames.get(t);
+          if (mapped) rawLetters.push(mapped);
+          else if (/^[a-z]$/.test(t)) rawLetters.push(t.toUpperCase());
+        });
+        h.replace(/[^a-z]/g,'').toUpperCase().split('').forEach(ch=>{
+          if (/^[A-Z]$/.test(ch)) rawLetters.push(ch);
+        });
+      });
+      const ranked = preferTargets(rawLetters).filter(L=>alphabet.includes(L) && !guessed.has(L));
+      if (ranked.length){
+        feedbackEl.style.color = '#ffd166';
+        feedbackEl.textContent = 'Not sure — tap your letter:';
+        disambiguate(ranked);
+        busy=false; return true;
+      }
+      return false;
+    };
+
+    const finalFallback = () => {
+      busy=false;
+      feedbackEl.style.color = '#ffd166';
+      feedbackEl.textContent = 'Try saying “C”, “Charlie”, or the full word.';
+      finish();
+    };
+
+    listenFree(({heard, alts})=>{
+      if (handlePick(pickLetterFromTranscript(heard, alts))) return;
+
+      listenLetterFirst(({heard:h2, alts:a2})=>{
+        if (handlePick(pickLetterFromTranscript(h2, a2))) return;
+        const toks = [h2, ...(Array.isArray(a2)?a2.map(a=>a?.transcript||''):[])].map(norm).filter(Boolean);
+        if (propose(toks)) return;
+        finalFallback();
+      });
+    });
+  });
+
+  // Keyboard support
   const keyHandler = (e) => {
     const k = (e.key || "").toUpperCase();
     if (/^[A-Z]$/.test(k)) { e.preventDefault(); guessLetter(k); }
@@ -6591,6 +7643,7 @@ function loadHangmanScene(id) {
   document.addEventListener("keydown", keyHandler);
   window.__hmKeyHandler = keyHandler;
 
+  // Clean key handler if scene unmounts
   const observer = new MutationObserver(() => {
     const alive = document.getElementById('hangman');
     if (!alive && window.__hmKeyHandler) {
@@ -6602,7 +7655,13 @@ function loadHangmanScene(id) {
   observer.observe(document.body, { childList: true, subtree: true });
 
   displayWord();
+
+  // Belt & braces: remove any global speech buttons
+  document.getElementById('mc-speak-btn')?.remove();
+  document.getElementById('floating-mc-mic')?.remove();
 }
+
+
 
 
 
@@ -6647,8 +7706,7 @@ function loadSurvivorQuizScene(id) {
   wrap.style.maxWidth = '760px';
   wrap.style.margin = '0 auto';
   wrap.style.padding = '12px 8px';
-  wrap.style.color = 'var(--text-default)'; // strong dark text on white
-
+  wrap.style.color = '#eee';
 
   wrap.innerHTML = `
     <div id="sv-top" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -6704,7 +7762,7 @@ function loadSurvivorQuizScene(id) {
   function finishLose() {
     stopTimer();
     elFB.textContent = "❌ You ran out of lives.";
-    elFB.style.color = "#C0392B";   // error / timeout
+    elFB.style.color = "salmon";
     elCtrl.innerHTML = "";
 
     if (Array.isArray(scene.setFlagsOnLose)) scene.setFlagsOnLose.forEach(setFlag);
@@ -6755,7 +7813,7 @@ function loadSurvivorQuizScene(id) {
 
     // Neutral summary; only show Hub if not suppressed
     elFB.textContent = `🏁 Done! Score: ${score}/${qs.length}`;
-    elFB.style.color = "var(--brand-blue)"; // summary
+    elFB.style.color = "#7fffd4";
     elCtrl.innerHTML = "";
 
     if (!scene.suppressHub) {
@@ -6775,12 +7833,12 @@ function loadSurvivorQuizScene(id) {
     if (correct) {
       score++;
       elFB.textContent = "✅ Correct!";
-      elFB.style.color = "#1E7F3B";   // correct
+      elFB.style.color = "lightgreen";
     } else {
       lives--;
       paintLives();
       elFB.textContent = timedOut ? "⌛ Time’s up!" : "❌ Not quite.";
-      elFB.style.color = "#C0392B";   // error / timeout
+      elFB.style.color = "salmon";
       if (q.explain) {
         const exp = document.createElement('div');
         exp.style.marginTop = "6px";
@@ -6806,22 +7864,9 @@ function loadSurvivorQuizScene(id) {
     (q.options || []).forEach((opt, i) => {
       const b = document.createElement('button');
       b.textContent = opt;
-      b.style.cssText = [
-  "text-align:left",
-  "padding:12px 14px",
-  "border-radius:12px",
-  "border:2px solid var(--brand-blue)",
-  "background:#fff",
-  "color:var(--brand-blue)",
-  "font-weight:800",                 // bolder blue
-  "cursor:pointer",
-  "box-shadow:0 2px 8px rgba(0,0,0,0.06)",
-  "filter:none"
-].join(";");
-
-b.onmouseenter = () => { b.style.background = "var(--brand-blue)"; b.style.color = "#fff"; };
-b.onmouseleave = () => { b.style.background = "#fff";            b.style.color = "var(--brand-blue)"; };
-
+      b.style.cssText = "text-align:left;padding:10px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;font-weight:700;cursor:pointer";
+      b.onmouseenter = () => (b.style.background = "#00cccc");
+      b.onmouseleave = () => (b.style.background = "#00ffff");
       b.onclick = () => handleAnswer(i, false);
       elOpts.appendChild(b);
     });
@@ -6864,7 +7909,7 @@ b.onmouseleave = () => { b.style.background = "#fff";            b.style.color =
 
   // Otherwise show a summary + buttons that make sense for gating
   elFB.textContent = `🏁 Done! Score: ${score}/${qs.length}`;
-  elFB.style.color = "var(--brand-blue)"; // summary
+  elFB.style.color = "#7fffd4";
   elCtrl.innerHTML = "";
 
   // Always offer Retry in the no-route case
@@ -6938,8 +7983,7 @@ function loadConjugationRaceScene(id) {
   wrap.style.maxWidth = '760px';
   wrap.style.margin = '0 auto';
   wrap.style.padding = '12px 8px';
-  wrap.style.color = 'var(--text-default)'; // strong dark text on white
-
+  wrap.style.color = '#eee';
 
   wrap.innerHTML = `
     <div id="cr-top" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -7022,18 +8066,8 @@ function loadConjugationRaceScene(id) {
 
   function setPrompt(q) {
     elPrompt.textContent = q.prompt || '';
-    if (q.hint) {
-  elFB.textContent = `💡 ${q.hint}`;
-  elFB.style.color = "var(--brand-blue-700)";   // darker brand blue
-  elFB.style.fontWeight = "800";                // heavier
-  elFB.style.fontSize = "0.95rem";              // slightly larger
-} else {
-  elFB.textContent = "";
-  elFB.style.color = "";
-  elFB.style.fontWeight = "";
-  elFB.style.fontSize = "";
-}
-
+    elFB.textContent = q.hint ? `💡 ${q.hint}` : '';
+    elFB.style.color = q.hint ? "#9fe8ff" : "";
   }
 
   function disableInput() { elInput.disabled = true; elSubmit.disabled = true; }
@@ -7045,7 +8079,7 @@ function loadConjugationRaceScene(id) {
 
     const summary = `🏁 Done! Score: ${score}/${items.length}`;
     elFB.textContent = summary;
-    elFB.style.color = "var(--brand-blue)"; // summary
+    elFB.style.color = "#7fffd4";
     elCtrl.innerHTML = "";
 
     // Branching endings support
@@ -7091,11 +8125,11 @@ function loadConjugationRaceScene(id) {
 
     if (ok && !timedOut) {
       score++; paintScore();
-      elFB.textContent = "✅ Correct!"; elFB.style.color = "#1E7F3B";   // correct
+      elFB.textContent = "✅ Correct!"; elFB.style.color = "lightgreen";
       setTimeout(() => { qIndex++; (qIndex >= items.length) ? finish() : renderQuestion(); }, 600);
     } else {
       elFB.textContent = timedOut ? "⌛ Time’s up." : "❌ Not quite.";
-      elFB.style.color = "#C0392B";   // error / timeout
+      elFB.style.color = "salmon";
       if (showAnswerOnWrong && answers.length) {
         const ans = document.createElement('div');
         ans.style.marginTop = "6px"; ans.style.opacity = ".9";
@@ -7147,7 +8181,7 @@ function loadConjugationRaceScene(id) {
 
   const summary = `🏁 Done! Score: ${score}/${items.length}`;
   elFB.textContent = summary;
-  elFB.style.color = "var(--brand-blue)"; // summary
+  elFB.style.color = "#7fffd4";
   elCtrl.innerHTML = "";
 
   // If using scoring + endings
@@ -7405,7 +8439,6 @@ function loadHotspotsScene(id) {
 }
 
 // === Buckets / Kanban Sort (seepage-proof) ===
-// === Buckets (pink-magenta theme; readable on white) ===
 function loadBucketsScene(id) {
   const scene = scenes[id];
   if (!scene) { console.error(`Scene ${id} not found.`); return; }
@@ -7429,14 +8462,15 @@ function loadBucketsScene(id) {
   if (gameContainer) gameContainer.style.display = "block";
 
   // Scene shape:
-  // buckets: [{ id:'separable', label:'Separable' }, ...]
-  // tokens:  ['take off','turn on', ...]
-  // answers: { separable:[...], inseparable:[...] }
+  // buckets: [{ id:'separable', label:'Separable' }, { id:'inseparable', label:'Inseparable' }, ...]
+  // tokens:  ['take off','turn on','look after','get over', ...]
+  // answers: { separable:['take off','turn on'], inseparable:['look after','get over'] }
+  // allowExtraInBank: true (optional), showAnswerOnWrong: true (default), next:'scene1'
   const buckets = Array.isArray(scene.buckets) ? scene.buckets : [];
   const tokens  = Array.isArray(scene.tokens) ? scene.tokens.slice() : [];
   const answers = scene.answers || {};
-  const allowExtraInBank   = scene.allowExtraInBank !== false; // default true: distractors can stay in bank
-  const showAnswerOnWrong  = scene.showAnswerOnWrong !== false; // default true
+  const allowExtraInBank = scene.allowExtraInBank !== false; // default true: distractors can stay in bank
+  const showAnswerOnWrong = scene.showAnswerOnWrong !== false; // default true
 
   // Wrapper
   const wrap = document.createElement('div');
@@ -7444,21 +8478,15 @@ function loadBucketsScene(id) {
   wrap.style.maxWidth = '1100px';
   wrap.style.margin = '0 auto';
   wrap.style.padding = '10px 6px';
-  wrap.style.color = 'var(--text-default)';
+  wrap.style.color = '#eee';
 
   // grid: bank on top, buckets below
   wrap.innerHTML = `
     <div id="bk-bank-wrap" style="margin-bottom:14px;">
-      <div style="font-weight:800;margin-bottom:8px;color:var(--accent-pink-700);">Tokens</div>
-      <div id="bk-bank" style="
-        display:flex;flex-wrap:wrap;gap:8px;min-height:54px;
-        border:2px dashed var(--accent-pink);
-        background: var(--accent-pink-50);
-        border-radius:12px;padding:10px;"></div>
+      <div style="font-weight:700;margin-bottom:8px;">Tokens</div>
+      <div id="bk-bank" style="display:flex;flex-wrap:wrap;gap:8px;min-height:54px;border:1px dashed #00ffff33;border-radius:12px;padding:10px;"></div>
     </div>
-
     <div id="bk-buckets" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start;"></div>
-
     <div id="bk-feedback" style="margin-top:14px;font-weight:700;"></div>
     <div id="bk-ctrl" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
   `;
@@ -7466,27 +8494,18 @@ function loadBucketsScene(id) {
   if (sceneText && sceneText.parentNode) sceneText.parentNode.insertBefore(wrap, sceneText.nextSibling);
   else gameContainer.appendChild(wrap);
 
-  const bank  = wrap.querySelector('#bk-bank');
+  const bank = wrap.querySelector('#bk-bank');
   const panel = wrap.querySelector('#bk-buckets');
-  const fb    = wrap.querySelector('#bk-feedback');
-  const ctrl  = wrap.querySelector('#bk-ctrl');
+  const fb = wrap.querySelector('#bk-feedback');
+  const ctrl = wrap.querySelector('#bk-ctrl');
 
-  // Build chips (pink outline, fill on hover)
+  // Build chips
   tokens.forEach(txt => {
     const chip = document.createElement('div');
     chip.className = 'bk-chip';
     chip.dataset.value = txt;
     chip.textContent = txt;
-    chip.style.cssText = [
-      "pointer-events:auto","user-select:none",
-      "padding:8px 10px","border-radius:10px",
-      "border:2px solid var(--accent-pink)",
-      "background:#fff","color:var(--accent-pink)",
-      "font-weight:800","cursor:grab",
-      "box-shadow:0 2px 8px rgba(0,0,0,0.06)"
-    ].join(";");
-    chip.onmouseenter = () => { chip.style.background = "var(--accent-pink)"; chip.style.color = "#fff"; };
-    chip.onmouseleave = () => { chip.style.background = "#fff";               chip.style.color = "var(--accent-pink)"; };
+    chip.style.cssText = "pointer-events:auto;user-select:none;padding:8px 10px;border-radius:10px;border:2px solid #00ffff;background:#000;color:#0ff;font-weight:700;cursor:grab";
     bank.appendChild(chip);
   });
 
@@ -7502,14 +8521,13 @@ function loadBucketsScene(id) {
   buckets.forEach(b => {
     const col = document.createElement('div');
     col.className = 'bk-col';
-    col.style.cssText = "background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;min-height:140px;box-shadow:var(--shadow);";
+    col.style.cssText = "background:#000a;border:1px solid #00bcd455;border-radius:12px;padding:10px;min-height:140px;";
 
     col.innerHTML = `
-      <div class="bk-title" style="font-weight:800;margin-bottom:8px;color:var(--accent-pink-700)">${b.label || b.id}</div>
+      <div class="bk-title" style="font-weight:800;margin-bottom:8px;color:#9fe8ff">${b.label || b.id}</div>
       <div class="bk-drop" id="bk-drop-${b.id}" data-bucket="${b.id}"
-           style="display:flex;flex-wrap:wrap;gap:8px;min-height:54px;
-                  background: var(--accent-pink-50); border:2px dashed var(--accent-pink); border-radius:10px; padding:8px;"></div>
-      <div class="bk-hint" style="opacity:1;margin-top:6px;font-size:.95rem;color:var(--text-default);"></div>
+           style="display:flex;flex-wrap:wrap;gap:8px;min-height:54px;"></div>
+      <div class="bk-hint" style="opacity:.85;margin-top:6px;font-size:.9rem;"></div>
     `;
     if (b.hint) col.querySelector('.bk-hint').textContent = b.hint;
     panel.appendChild(col);
@@ -7525,50 +8543,24 @@ function loadBucketsScene(id) {
   // Controls
   const resetBtn = document.createElement('button');
   resetBtn.textContent = "Reset";
-  resetBtn.style.cssText = [
-    "padding:10px 14px","border-radius:12px",
-    "border:2px solid var(--border)","background:#fff",
-    "color:var(--text-default)","cursor:pointer","font-weight:700",
-    "box-shadow:0 2px 8px rgba(0,0,0,0.06)"
-  ].join(";");
+  resetBtn.style.cssText = "padding:8px 12px;border-radius:10px;border:none;background:#333;color:#eee;cursor:pointer;font-weight:700";
   resetBtn.onclick = () => {
     // send all chips back to bank
     wrap.querySelectorAll('.bk-drop .bk-chip').forEach(ch => bank.appendChild(ch));
     fb.textContent = "";
     // clear highlights
-    wrap.querySelectorAll('.bk-chip').forEach(ch => ch.style.borderColor = 'var(--accent-pink)');
-    // clear per-bucket hints
-    wrap.querySelectorAll('.bk-col .bk-hint').forEach(h => { h.textContent = ""; h.style.color = "var(--text-default)"; h.style.fontWeight = "700"; });
+    wrap.querySelectorAll('.bk-chip').forEach(ch => ch.style.borderColor = '#00ffff');
   };
   ctrl.appendChild(resetBtn);
 
   const checkBtn = document.createElement('button');
   checkBtn.textContent = "Check";
-  checkBtn.style.cssText = [
-    "padding:10px 14px","border-radius:12px",
-    "border:2px solid var(--accent-pink)","background:#fff",
-    "color:var(--accent-pink)","cursor:pointer","font-weight:800",
-    "box-shadow:0 2px 8px rgba(0,0,0,0.06)"
-  ].join(";");
-  checkBtn.onmouseenter = () => { checkBtn.style.backgroundColor = "var(--accent-pink)"; checkBtn.style.color = "#fff"; };
-  checkBtn.onmouseleave = () => { checkBtn.style.backgroundColor = "#fff";               checkBtn.style.color = "var(--accent-pink)"; };
-  ctrl.appendChild(checkBtn);
-
-  const backBtn = document.createElement('button');
-  backBtn.textContent = "Back to Hub";
-  backBtn.style.cssText = [
-    "padding:10px 14px","border-radius:12px",
-    "border:2px solid var(--border)","background:#fff",
-    "color:var(--text-default)","cursor:pointer","font-weight:700",
-    "box-shadow:0 2px 8px rgba(0,0,0,0.06)"
-  ].join(";");
-  backBtn.onclick = () => goNext("scene1");
-  ctrl.appendChild(backBtn);
-
+  checkBtn.style.cssText = "padding:8px 12px;border-radius:10px;border:none;background:#00ffff;color:#000;cursor:pointer;font-weight:700";
+  checkBtn.onmouseenter = () => (checkBtn.style.backgroundColor = "#00cccc");
+  checkBtn.onmouseleave = () => (checkBtn.style.backgroundColor = "#00ffff");
   checkBtn.onclick = () => {
     // Clear previous highlights
-    wrap.querySelectorAll('.bk-chip').forEach(ch => ch.style.borderColor = 'var(--accent-pink)');
-    wrap.querySelectorAll('.bk-col .bk-hint').forEach(h => { h.textContent = ""; h.style.color = "var(--text-default)"; h.style.fontWeight = "700"; });
+    wrap.querySelectorAll('.bk-chip').forEach(ch => ch.style.borderColor = '#00ffff');
 
     // build placed map
     const placed = {};
@@ -7582,7 +8574,7 @@ function loadBucketsScene(id) {
       const leftovers = Array.from(bank.querySelectorAll('.bk-chip')).length;
       if (leftovers > 0) {
         fb.textContent = "⚠️ Sort all tokens into a bucket.";
-        fb.style.color = "#B36B00"; // darker amber
+        fb.style.color = "orange";
         return;
       }
     }
@@ -7595,7 +8587,10 @@ function loadBucketsScene(id) {
 
       // Wrong if: any missing target OR any extra not in want
       let ok = true;
+
+      // missing
       want.forEach(w => { if (!got.includes(w)) ok = false; });
+      // extras
       got.forEach(g => { if (!want.has(g)) ok = false; });
 
       if (!ok) {
@@ -7604,28 +8599,34 @@ function loadBucketsScene(id) {
         const drop = document.getElementById(`bk-drop-${b.id}`);
         Array.from(drop.querySelectorAll('.bk-chip')).forEach(ch => {
           const val = (ch.dataset.value || "").toLowerCase();
-          if (!want.has(val)) ch.style.borderColor = '#C0392B'; // accessible red for wrong
+          if (!want.has(val)) ch.style.borderColor = 'salmon';
         });
         if (showAnswerOnWrong && want.size) {
           const hintEl = drop.parentElement.querySelector('.bk-hint');
           hintEl.textContent = `Expected: ${Array.from(want).join(', ')}`;
-          hintEl.style.color = "var(--accent-pink-700)";
-          hintEl.style.fontWeight = "800";
+          hintEl.style.color = '#ffd27f';
         }
       }
     });
 
     if (allOk) {
       fb.textContent = "✅ Correct! Moving on...";
-      fb.style.color = "#1E7F3B"; // accessible green
+      fb.style.color = "lightgreen";
       if (Array.isArray(scene.setFlagsOnWin)) scene.setFlagsOnWin.forEach(setFlag);
       if (Array.isArray(scene.unlockScenesOnWin)) scene.unlockScenesOnWin.forEach(unlockScene);
       setTimeout(() => { if (scene.next) goNext(scene.next); }, 900);
     } else {
       fb.textContent = "❌ Some items are misplaced. Adjust and try again.";
-      fb.style.color = "#C0392B"; // accessible red
+      fb.style.color = "salmon";
     }
   };
+  ctrl.appendChild(checkBtn);
+
+  const backBtn = document.createElement('button');
+  backBtn.textContent = "Back to Hub";
+  backBtn.style.cssText = "padding:8px 12px;border-radius:10px;border:none;background:#222;color:#eee;cursor:pointer;font-weight:700";
+  backBtn.onclick = () => goNext("scene1");
+  ctrl.appendChild(backBtn);
 
   // cleanup + navigation
   function cleanup() {
@@ -7643,6 +8644,23 @@ function loadBucketsScene(id) {
   mo.observe(document.body, { childList: true, subtree: true });
 }
 
+// === Particle Swapper (live preview, seepage-proof) ===
+// Supports two modes:
+//
+//  A) Full-phrase mode (default):
+//     template: 'Please {{CHOICE}} the music.'
+//     options: ['turn up','turn down','turn off']
+//     correct: 1
+//
+//  B) Particle-only mode:
+//     template: 'Please {{PARTICLE}} the heater.'   (or 'Please turn {{PARTICLE}} the heater.')
+//     verb: 'turn'   // optional, used only for preview notes mapping
+//     options: ['up','down','off']
+//     correct: 2
+//
+// Optional:
+//     previews: { '<option or full>': 'emoji or note', ... }
+//     next, setFlagsOnWin[], unlockScenesOnWin[]
 function loadParticleSwapperScene(id) {
   const scene = scenes[id];
   if (!scene) { console.error(`Scene ${id} not found.`); return; }
@@ -8051,8 +9069,7 @@ function loadDashboardScene(id) {
   wrap.style.maxWidth = '1100px';
   wrap.style.margin = '0 auto';
   wrap.style.padding = '8px 6px';
-  wrap.style.color = 'var(--text-default)'; // strong dark text on white
-
+  wrap.style.color = '#eee';
   regNode(wrap);
 
   const questions = Array.isArray(scene.questions) ? scene.questions : [];
@@ -8062,8 +9079,7 @@ function loadDashboardScene(id) {
       display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
       gap:12px;align-items:start;">
     </div>
-    ${questions.length ? `<div id="dash-qa" style="margin-top:16px;border-top:1px solid var(--brand-blue-50);padding-top:12px;"></div>` : ``}
-
+    ${questions.length ? `<div id="dash-qa" style="margin-top:16px;border-top:1px solid #00ffff55;padding-top:12px;"></div>` : ``}
   `;
   if (sceneText && sceneText.parentNode) sceneText.parentNode.insertBefore(wrap, sceneText.nextSibling);
   else game.appendChild(wrap);
@@ -8077,11 +9093,11 @@ function loadDashboardScene(id) {
   function card(title) {
     const c = document.createElement('div');
     c.className = 'dash-card';
-    c.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow);';
+    c.style.cssText = 'background:#0a0a0a;border:1px solid #00ffff33;border-radius:12px;padding:12px;box-shadow:0 4px 16px #0006;';
     if (title) {
       const h = document.createElement('div');
       h.textContent = title;
-      h.style.cssText = 'font-weight:800;margin-bottom:8px;color:var(--brand-blue);';
+      h.style.cssText = 'font-weight:800;margin-bottom:8px;color:#0ff;';
       c.appendChild(h);
     }
     regNode(c);
@@ -8096,8 +9112,7 @@ function loadDashboardScene(id) {
     const delta = Number(w.delta || 0);
     const sign = delta > 0 ? '+' : '';
     d.textContent = `${sign}${delta}% vs prev`;
-    d.style.cssText = `font-weight:700;${delta>=0?'color:#1E7F3B;':'color:#C0392B;'}`;
-
+    d.style.cssText = `font-weight:700;${delta>=0?'color:#9effa0;':'color:salmon;'}`;
     c.appendChild(val); c.appendChild(d);
     return c;
   }
@@ -8109,16 +9124,16 @@ function loadDashboardScene(id) {
       line.style.cssText='display:flex;align-items:center;gap:8px;margin:6px 0;';
       const label = document.createElement('div');
       label.textContent = row.label ?? '';
-      label.style.cssText='min-width:64px;opacity:.9;color:var(--text-default);';
+      label.style.cssText='min-width:64px;opacity:.9;';
       const barBox = document.createElement('div');
-      barBox.style.cssText='flex:1;background:var(--brand-blue-50);border-radius:8px;overflow:hidden;border:1px solid var(--border);';
+      barBox.style.cssText='flex:1;background:#111;border-radius:8px;overflow:hidden;border:1px solid #00ffff33;';
       const bar = document.createElement('div');
       const pct = Math.max(0, Math.min(100, (row.value||0)/max*100));
-      bar.style.cssText=`height:14px;width:${pct}%;background:linear-gradient(90deg,var(--brand-blue),var(--brand-blue-700));`;
+      bar.style.cssText=`height:14px;width:${pct}%;background:linear-gradient(90deg,#00ffff,#00cccc);`;
       barBox.appendChild(bar);
       const val = document.createElement('div');
       val.textContent = row.value ?? '';
-      val.style.cssText='min-width:44px;text-align:right;color:var(--text-default);opacity:.9;';
+      val.style.cssText='min-width:44px;text-align:right;opacity:.85;';
       line.appendChild(label); line.appendChild(barBox); line.appendChild(val);
       c.appendChild(line);
     });
@@ -8127,7 +9142,7 @@ function loadDashboardScene(id) {
   function renderPie(w) {
     const total = (w.data||[]).reduce((a,b)=>a+(b.value||0),0) || 1;
     let acc = 0;
-    const colors = ['var(--brand-blue)','rgba(30,127,59,.9)','#f9c74f','#f8961e','#577590','#f94144','#90be6d']; // keeps variety, first = brand
+    const colors = ['#00ffff','#9effa0','#f9f871','#f99','#0bf','#f0f','#ffa500'];
     const stops = (w.data||[]).map((seg,i)=>{
       const start = acc/total*360; acc += (seg.value||0);
       const end = acc/total*360;
@@ -8138,7 +9153,7 @@ function loadDashboardScene(id) {
     const ring = document.createElement('div');
     ring.style.cssText=`width:140px;height:140px;border-radius:50%;margin:6px auto;background:conic-gradient(${stops});`;
     const hole = document.createElement('div');
-    hole.style.cssText='width:80px;height:80px;border-radius:50%;background:#fff;margin:-110px auto 8px;border:1px solid var(--border);';
+    hole.style.cssText='width:80px;height:80px;border-radius:50%;background:#0a0a0a;margin:-110px auto 8px;border:1px solid #00ffff33;';
     c.appendChild(ring); c.appendChild(hole);
     (w.data||[]).forEach((seg,i)=>{
       const row=document.createElement('div');
@@ -8157,7 +9172,7 @@ function loadDashboardScene(id) {
     const trh = document.createElement('tr');
     (w.columns||[]).forEach(h=>{
       const th=document.createElement('th');
-      th.textContent=h; th.style.cssText='text-align:left;border-bottom:1px solid var(--border);padding:6px;color:var(--brand-blue);';
+      th.textContent=h; th.style.cssText='text-align:left;border-bottom:1px solid #00ffff33;padding:6px;';
       trh.appendChild(th);
     });
     thead.appendChild(trh); tbl.appendChild(thead);
@@ -8166,7 +9181,7 @@ function loadDashboardScene(id) {
       const tr=document.createElement('tr');
       (r||[]).forEach(cell=>{
         const td=document.createElement('td');
-        td.textContent=cell; td.style.cssText='padding:6px;border-bottom:1px dashed var(--border);color:var(--text-default);';
+        td.textContent=cell; td.style.cssText='padding:6px;border-bottom:1px dashed #00ffff1f;';
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -8309,7 +9324,2407 @@ window._dbgScore = () => {
   return { cur, max, pct, scInit, scStatus, scRaw, TOTAL_AWARD_MAX: window.__TOTAL_AWARD_MAX };
 };
 
+/* =========================================================
+   Phoneme helpers + attachSpeechCheck (MIT-style, drop-in)
+   Place ABOVE ensureSpeechUI() and the speech hook IIFE
+   so the hook can call window.attachSpeechCheck.
+========================================================= */
+
+/* ---------- Minimal phoneme helpers ---------- */
+const __PH_EN = {
+  'ee':'IY','ea':'IY','ai':'EY','ay':'EY','oo':'UW','ou':'AW','ow':'AW','oa':'OW',
+  'th':'TH','sh':'SH','ch':'CH','ph':'F','gh':'G',
+  'a':'AH','e':'EH','i':'IH','o':'AO','u':'UH',
+  'r':'R','l':'L','v':'V','b':'B','t':'T','d':'D','k':'K','g':'G','s':'S','z':'Z','f':'F','h':'H','m':'M','n':'N'
+};
+const __PH_ES = { // crude, just to drive feedback
+  'c(a|o|u)':'K','c(e|i)':'S','qu':'K','gu(e|i)':'G','ll':'ʝ','ñ':'NY','ch':'CH','rr':'Rr',
+  'r':'R','b':'B','v':'B','z':'S','j':'H','x':'KS','a':'a','e':'e','i':'i','o':'o','u':'u'
+};
+
+function __g2p(word, lang = 'en') {
+  const w = String(word || '').toLowerCase();
+  const map = lang.startsWith('es') ? __PH_ES : __PH_EN;
+  let out = [], i = 0;
+  while (i < w.length) {
+    let picked = null, used = 1;
+    if (lang.startsWith('es')) {
+      for (const [k, v] of Object.entries(map)) {
+        const re = new RegExp('^' + k);
+        const m = w.slice(i).match(re);
+        if (m) { picked = v; used = m[0].length; break; }
+      }
+    } else {
+      const tri = w.slice(i, i + 3), bi = w.slice(i, i + 2), si = w[i];
+      if (map[tri]) { picked = map[tri]; used = 3; }
+      else if (map[bi]) { picked = map[bi]; used = 2; }
+      else if (map[si]) { picked = map[si]; used = 1; }
+    }
+    out.push(picked || w[i]?.toUpperCase());
+    i += used;
+  }
+  return out;
+}
+
+function __lev(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const sub = (a[i - 1] === b[j - 1]) ? 0 : (
+        (a[i-1]==='TH' && b[j-1]==='T') || (a[i-1]==='T' && b[j-1]==='TH') ||
+        (a[i-1]==='V'  && b[j-1]==='B') || (a[i-1]==='B' && b[j-1]==='V')  ||
+        (a[i-1]==='IH' && b[j-1]==='IY') || (a[i-1]==='IY' && b[j-1]==='IH')
+      ) ? 0.5 : 1;
+      dp[i][j] = Math.min(
+        dp[i-1][j] + 1,         // deletion
+        dp[i][j-1] + 1,         // insertion
+        dp[i-1][j-1] + sub      // substitution
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+function phonemeScore(recognizedText, targetText, lang = 'en-US') {
+  const norm = s => String(s || '')
+    .toLowerCase()
+    .replace(/[^a-záéíóúüñç' -]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const rTok = norm(recognizedText).split(' ').filter(Boolean);
+  const tTok = norm(targetText).split(' ').filter(Boolean);
+
+  let hits = 0, total = Math.max(1, tTok.length), issues = [];
+  for (const t of tTok) {
+    const tp = __g2p(t, lang);
+    let best = Infinity, bestWord = null;
+    for (const r of rTok) {
+      const rp = __g2p(r, lang);
+      const d = __lev(rp, tp) / Math.max(1, Math.max(rp.length, tp.length));
+      if (d < best) { best = d; bestWord = r; }
+    }
+    if (best <= 0.34) hits++; else issues.push({ word: t, heard: bestWord, d: best });
+  }
+  return { coverage: hits / total, hits, total, issues };
+}
+
+/* ---------- attachSpeechCheck (blended scoring) ---------- */
+/**
+ * attachSpeechCheck(buttonEl, expectedText, sceneOverrides?)
+ * Uses your global SpeechFeature to capture ASR, then blends:
+ *  - token coverage (SpeechFeature.match)
+ *  - phoneme coverage (phonemeScore)
+ * Emits:
+ *  - 'speech-pass' CustomEvent(detail: {heard, token, phoneme, blended})
+ *  - 'speech-fail' (same detail) — not shown to user unless you listen for it.
+ */
+function attachSpeechCheck(buttonEl, expectedText, sceneOverrides = {}) {
+  const cfg = {
+    minCoverage: sceneOverrides.minCoverage ?? (window.SpeechFeature?.settings?.tolerance ?? 0.80),
+    allowOrderFlex: sceneOverrides.allowOrderFlex ?? true,
+    maxEditDistance: sceneOverrides.maxEditDistance,
+    stopWords: sceneOverrides.stopWords,
+    synonyms: sceneOverrides.synonyms,
+    weight: sceneOverrides.weight ?? { token: 0.7, phoneme: 0.3 },
+    requireMonotonic: sceneOverrides.requireMonotonic ?? false,
+    orderMin: (typeof sceneOverrides.orderMin === 'number') ? sceneOverrides.orderMin : 0.95,
+
+    // NEW: global-ish floor so they can't just say a tiny prefix
+    minRequiredCoverage: (typeof sceneOverrides.minRequiredCoverage === 'number')
+      ? sceneOverrides.minRequiredCoverage
+      : 0.90   // 90% of key tokens by default
+  };
+
+  if (!buttonEl) return;
+  buttonEl.disabled = false;
+
+  buttonEl.addEventListener('click', () => {
+    const SF = window.SpeechFeature || {};
+    const hasAPI = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (!hasAPI) { alert('Speech API not available in this browser.'); return; }
+
+    if (SF.enabled !== true) {
+      const chk = document.getElementById('speech-enabled-checkbox');
+      if (chk) SF.enabled = chk.checked === true;
+    }
+    if (!SF.enabled) { alert('Enable speech first (⚙️).'); return; }
+
+    if (typeof SF.start !== 'function' || typeof SF.match !== 'function') {
+      console.warn('[attachSpeechCheck] SpeechFeature.start/match missing');
+      return;
+    }
+
+    SF.start((heard /*, alts */) => {
+      const lang = SF.settings?.lang || 'en-US';
+
+      // 1) Token / word coverage
+      const r1 = SF.match(heard, expectedText, {
+        minCoverage: cfg.minCoverage,
+        allowOrderFlex: cfg.allowOrderFlex,
+        maxEditDistance: cfg.maxEditDistance,
+        stopWords: cfg.stopWords,
+        synonyms: cfg.synonyms
+      });
+
+      // 2) Phoneme coverage
+      const r2 = phonemeScore(heard, expectedText, lang);
+
+      // 3) Blend token + phoneme
+      const blended = (cfg.weight.token * (r1.coverage ?? 0)) +
+                      (cfg.weight.phoneme * (r2.coverage ?? 0));
+
+      // 3.5) NEW: require "enough" of the sentence, regardless of tolerance
+      const totalTokens   = r1.total || String(expectedText||'').trim().split(/\s+/).filter(Boolean).length || 1;
+      const matchedTokens = r1.matched || 0;
+
+      // how strict we are about finishing the sentence:
+      const requiredTokens = Math.max(
+        2,
+        Math.round(totalTokens * cfg.minRequiredCoverage)
+      );
+
+      const fullEnough = matchedTokens >= requiredTokens;
+
+      // 4) Order strictness (optional)
+      const orderScore = (typeof r1.orderScore === 'number') ? r1.orderScore : 1;
+      let orderOK = true;
+      if (cfg.requireMonotonic === true) {
+        orderOK = orderScore >= cfg.orderMin;
+      }
+
+      // 5) Final pass condition
+      const pass = fullEnough && (blended >= cfg.minCoverage) && orderOK;
+
+      try {
+        console.log(
+          '[attachSpeechCheck] token=%d%%(%d/%d) phoneme=%d%% blended=%d%% ' +
+          'order=%d%% fullEnough=%s pass=%s',
+          Math.round((r1.coverage ?? 0) * 100),
+          matchedTokens,
+          totalTokens,
+          Math.round((r2.coverage ?? 0) * 100),
+          Math.round(blended * 100),
+          Math.round((orderScore ?? 1) * 100),
+          fullEnough,
+          pass
+        );
+      } catch(_) {}
+
+      const detail = {
+        heard,
+        token: r1,
+        phoneme: r2,
+        blended,
+        orderOK,
+        orderScore,
+        fullEnough,
+        requiredTokens
+      };
+
+      if (pass) {
+        buttonEl.dispatchEvent(new CustomEvent('speech-pass', { detail }));
+      } else {
+        buttonEl.dispatchEvent(new CustomEvent('speech-fail', { detail }));
+      }
+    }, () => {
+      console.warn('[attachSpeechCheck] no speech detected');
+    });
+  });
+}
+
+window.attachSpeechCheck = window.attachSpeechCheck || attachSpeechCheck;
+
+
+function ensureSpeechUI() {
+  // ===== 1) Bootstrap SpeechFeature ONCE (idempotent) =====
+  if (!window.__speechBootstrapped_min) {
+    window.__speechBootstrapped_min = true;
+
+    // Core object + defaults
+    window.SpeechFeature = window.SpeechFeature || {};
+    const SF = window.SpeechFeature;
+
+    // Availability + baseline settings (don’t override if already set)
+    SF.hasAPI   = SF.hasAPI ?? !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    SF.enabled  = SF.enabled ?? false;  // HUD checkbox controls this
+    SF.settings = SF.settings || { lang: 'en-US', tolerance: 0.80 };
+
+    // Minimal start(): one-shot Web Speech capture (define only if missing)
+    if (typeof SF.start !== 'function') {
+      SF.start = function start(onFinal, onNoInput) {
+        const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Rec) { console.warn('[SpeechFeature] Web Speech unavailable'); onNoInput?.(); return; }
+
+        const rec = new Rec();
+        rec.lang = SF.settings?.lang || 'en-US';
+        rec.interimResults = false;
+        rec.maxAlternatives = 5;
+
+        let gotFinal = false;
+        rec.onresult = (e) => {
+          try {
+            const alts = Array.from(e.results?.[0] || []);
+            const best = alts.sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
+            const heard = (best?.transcript || '').trim();
+            if (heard) { gotFinal = true; onFinal?.(heard, alts); }
+          } catch (err) {
+            console.warn('[SpeechFeature.start] result parse error:', err);
+          }
+        };
+        rec.onend   = () => { if (!gotFinal) onNoInput?.(); };
+        rec.onerror = (e) => { console.warn('[SpeechFeature.start] error:', e.error||e); onNoInput?.(); };
+
+        try {
+          rec.start();
+        } catch (err) {
+          console.warn('[SpeechFeature.start] start() failed:', err);
+          onNoInput?.();
+        }
+      };
+    }
+
+    // Minimal match(): token coverage + order score (define only if missing)
+    if (typeof SF.match !== 'function') {
+      SF.match = function match(heard, expected, opts = {}) {
+        const normalize = (s) => String(s||'')
+          .toLowerCase()
+          .replace(/[“”]/g,'"').replace(/[‘’]/g,"'")
+          .replace(/[^a-z0-9áéíóúüñçàèìòùâêîôûäëïöüœæß\s'-]/gi,' ')
+          .replace(/\s+/g,' ').trim();
+
+        const applySynonyms = (text, syn) => {
+          if (!syn) return text;
+          let out = ' ' + text + ' ';
+          for (const [canon, list] of Object.entries(syn)) {
+            for (const v of [].concat(list)) {
+              const re = new RegExp(`(^|\\s)${v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?=\\s|$)`, 'gi');
+              out = out.replace(re, `$1${canon}`);
+            }
+          }
+          return out.trim();
+        };
+
+        const stopSet = new Set((opts.stopWords || []).map(x => x.toLowerCase()));
+        const allowOrderFlex = opts.allowOrderFlex !== false; // default true
+
+        let heardNorm = normalize(heard);
+        heardNorm = applySynonyms(heardNorm, opts.synonyms);
+        const expectedNorm = normalize(expected);
+
+        let hT = heardNorm.split(' ').filter(Boolean);
+        let eT = expectedNorm.split(' ').filter(Boolean);
+
+        if (stopSet.size) {
+          eT = eT.filter(t => !stopSet.has(t));
+          hT = hT.filter(t => !stopSet.has(t));
+        }
+        if (!eT.length) return { coverage: 0, matched: 0, total: 1, orderScore: 1 };
+
+        // Bag-of-words coverage with multiplicity
+        const freq = new Map();
+        for (const t of hT) freq.set(t, (freq.get(t)||0)+1);
+
+        let matched = 0;
+        for (const t of eT) {
+          const n = freq.get(t) || 0;
+          if (n > 0) { matched++; freq.set(t, n-1); }
+        }
+        const coverage = matched / eT.length;
+
+        // Order score via LCS when strict order required
+        let orderScore = 1;
+        if (!allowOrderFlex) {
+          const m = eT.length, n = hT.length;
+          const dp = Array.from({length: m+1}, () => Array(n+1).fill(0));
+          for (let i=1;i<=m;i++) for (let j=1;j<=n;j++) {
+            if (eT[i-1] === hT[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+            else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+          }
+          const lcs = dp[m][n];
+          orderScore = lcs / m;
+        }
+
+        return { coverage, matched, total: eT.length, orderScore };
+      };
+    }
+
+    // Keep a live capability flag
+    SF.hasAPI = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  } // END bootstrap
+
+  // ===== 2) Ensure HUD / Panel exist (inject if missing) =====
+  const game = document.getElementById('game-container');
+  if (!game) return;
+
+  if (!document.getElementById('speech-hud')) {
+    game.insertAdjacentHTML('beforeend', `
+      <div id="speech-hud" class="speech-hud" aria-live="polite">
+        <button id="speech-toggle" class="speech-btn" title="Toggle Speech">🎤 Off</button>
+        <button id="speech-settings-btn" class="speech-btn" title="Speech Settings">⚙️</button>
+        <span id="speech-status" class="speech-chip" hidden>Listening…</span>
+        <span id="speech-transcript" class="speech-chip" hidden></span>
+      </div>
+    `);
+  }
+  if (!document.getElementById('speech-settings')) {
+    game.insertAdjacentHTML('beforeend', `
+      <div id="speech-settings" class="speech-panel" hidden>
+        <div class="speech-panel-inner">
+          <h3>Speech Settings</h3>
+          <div class="row">
+            <label>Enable Speech</label>
+            <label class="switch">
+              <input id="speech-enabled-checkbox" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="row">
+            <label for="speech-lang">Language</label>
+            <select id="speech-lang">
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+              <option value="es-ES">Español (ES)</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="speech-tolerance">Tolerance: <span id="speech-tolerance-value">0.80</span></label>
+            <input id="speech-tolerance" type="range" min="0.50" max="0.98" step="0.01" value="0.80">
+          </div>
+          <div class="row presets">
+            <button data-preset="strict" class="preset">Strict (0.92)</button>
+            <button data-preset="normal" class="preset">Normal (0.80)</button>
+            <button data-preset="lenient" class="preset">Lenient (0.65)</button>
+          </div>
+          <div class="row">
+            <button id="speech-close" class="speech-btn">Close</button>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+  if (!document.getElementById('speech-test')) {
+    game.insertAdjacentHTML('beforeend',
+      '<button id="speech-test" class="speech-btn">🎙️ Test mic</button>' +
+      '<div id="speech-test-out" class="speech-chip" style="display:block;margin-top:8px;"></div>'
+    );
+  }
+
+  // ===== 3) HUD ↔ SpeechFeature sync (restore + wire) =====
+  const chk   = document.getElementById('speech-enabled-checkbox');
+  const lang  = document.getElementById('speech-lang');
+  const tol   = document.getElementById('speech-tolerance');
+  const tolVal = document.getElementById('speech-tolerance-value');
+  const prefsKey = 'speech_prefs';
+
+  const SF = window.SpeechFeature;
+
+  // Restore saved prefs
+  try {
+    const saved = JSON.parse(localStorage.getItem(prefsKey) || '{}');
+    if (typeof saved.enabled === 'boolean') SF.enabled = saved.enabled;
+    if (typeof saved.lang === 'string')     SF.settings = {...(SF.settings||{}), lang: saved.lang};
+    if (typeof saved.tolerance === 'number') SF.settings = {...(SF.settings||{}), tolerance: saved.tolerance};
+  } catch {}
+
+  // Reflect to HUD
+  if (chk) chk.checked = !!SF.enabled;
+  if (lang && SF.settings?.lang) lang.value = SF.settings.lang;
+  if (tol  && SF.settings?.tolerance) {
+    tol.value = SF.settings.tolerance;
+    if (tolVal) tolVal.textContent = SF.settings.tolerance.toFixed(2);
+  }
+
+  // Wire changes
+  chk?.addEventListener('change', () => {
+    SF.enabled = !!chk.checked;
+    const s = JSON.parse(localStorage.getItem(prefsKey) || '{}'); s.enabled = SF.enabled;
+    localStorage.setItem(prefsKey, JSON.stringify(s));
+  });
+  lang?.addEventListener('change', () => {
+    SF.settings = {...(SF.settings||{}), lang: lang.value};
+    const s = JSON.parse(localStorage.getItem(prefsKey) || '{}'); s.lang = lang.value;
+    localStorage.setItem(prefsKey, JSON.stringify(s));
+  });
+  tol?.addEventListener('input', () => {
+    const t = Number(tol.value)||0.8;
+    SF.settings = {...(SF.settings||{}), tolerance: t};
+    if (tolVal) tolVal.textContent = t.toFixed(2);
+    const s = JSON.parse(localStorage.getItem(prefsKey) || '{}'); s.tolerance = t;
+    localStorage.setItem(prefsKey, JSON.stringify(s));
+  });
+
+  // ===== 4) Wire panel open/close/toggle (idempotent) =====
+  const open   = document.getElementById('speech-settings-btn');
+  const panel  = document.getElementById('speech-settings');
+  const close  = document.getElementById('speech-close');
+  const toggle = document.getElementById('speech-toggle');
+
+  if (open && !open.dataset.bound) {
+    open.addEventListener('click', () => { panel.hidden = false; });
+    open.dataset.bound = '1';
+  }
+  if (close && !close.dataset.bound) {
+    close.addEventListener('click', () => { panel.hidden = true; });
+    close.dataset.bound = '1';
+  }
+  if (panel && !panel.dataset.bound) {
+    panel.addEventListener('click', (e) => { if (e.target === panel) panel.hidden = true; });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) panel.hidden = true; });
+    panel.dataset.bound = '1';
+  }
+  if (toggle && !toggle.dataset.bound) {
+    toggle.addEventListener('click', () => {
+      const on = toggle.textContent.includes('On');
+      toggle.textContent = on ? '🎤 Off' : '🎤 On';
+    });
+    toggle.dataset.bound = '1';
+  }
+
+  // ===== 5) Wire mic smoke test (idempotent) =====
+  (function wireMicSmokeTest(){
+    const btn = document.getElementById('speech-test');
+    const out = document.getElementById('speech-test-out');
+    if (!btn || !out || btn.dataset.bound) return;
+
+    btn.addEventListener('click', () => {
+      if (window.SpeechFeature && SpeechFeature.hasAPI) {
+        if (!SpeechFeature.enabled) { out.textContent = 'Enable speech first (⚙️ → toggle).'; return; }
+        out.textContent = 'Listening…';
+        SpeechFeature.start(
+          (heard) => { out.textContent = `Heard: "${heard}"`; },
+          () => { if (out.textContent === 'Listening…') out.textContent = 'No input.'; }
+        );
+        return;
+      }
+      const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!Rec) { out.textContent = 'Web Speech API not available in this browser.'; return; }
+      const rec = new Rec();
+      rec.lang = (window.SpeechFeature?.settings?.lang) || 'en-US';
+      rec.interimResults = false; rec.maxAlternatives = 1;
+      out.textContent = 'Listening…';
+      rec.onresult = (e)=>{ out.textContent = `Heard: "${e.results[0][0].transcript.trim()}"`; };
+      rec.onerror  = (e)=>{ out.textContent = `Error: ${e.error || 'unknown'}`; };
+      rec.onend    = ()=>{ if (out.textContent === 'Listening…') out.textContent = 'No input.'; };
+      try { rec.start(); } catch (err) { out.textContent = `Start failed: ${err.message}`; }
+    });
+
+    btn.dataset.bound = '1';
+  })();
+    // ===== 6) Per-scene visibility gate (central authority) =====
+  // ===== 6) Per-scene visibility gate (central authority) =====
+  try {
+    const scId = window.currentSceneId;
+    const sc   = (window.scenes || {})[scId] || null;
+
+    const hud       = document.getElementById('speech-hud');
+    const panel     = document.getElementById('speech-settings');
+    const testBtn   = document.getElementById('speech-test');
+
+    // Classic per-question speak button (MC, video-choice, etc.)
+    const nativeBtn = document.getElementById('mc-speak-btn');
+    // Any floating mic we may have created earlier
+    const floatMic  = document.getElementById('floating-mc-mic');
+
+    const allowTypes = new Set([
+      'hangman',
+      'interaction',
+      'interaction-scramble',
+      'interaction-fill-in-the-blank',
+      'interaction-audio-mc',      // text-based MC; audio-only ones opt-out via disableSpeech:true
+      'video-choice',
+      'video-multi-question',
+      'video-multi-audio-choice',
+      'video-scramble',
+      'video-fill-in-the-blank',
+      'text'
+    ]);
+
+    let allow = false;
+    if (sc) {
+      if (sc.enableSpeech === true) {
+        // explicit opt-in wins
+        allow = true;
+      } else if (sc.disableSpeech === true) {
+        // explicit opt-out wins
+        allow = false;
+      } else if (allowTypes.has(sc.type)) {
+        // allowed by type if not explicitly disabled
+        allow = true;
+      }
+    }
+
+    const hide = (el) => { if (el) el.style.display = 'none'; };
+    const show = (el) => { if (el) el.style.display = ''; };
+
+    if (!allow) {
+      // Hide EVERYTHING speech-related on disallowed scenes
+      hide(hud);
+      hide(panel);
+      hide(testBtn);
+      hide(nativeBtn);
+      hide(floatMic);
+    } else {
+      // Show on allowed scenes (you can tweak which bits you expose)
+      show(hud);
+      show(panel);
+      show(testBtn);
+      show(nativeBtn);
+      show(floatMic);
+    }
+  } catch (e) {
+    console.warn('[speech-gate] failed in ensureSpeechUI:', e);
+  }
+
+
+}
+
+function wantsSpeechForScene(scene) {
+  if (!scene || typeof scene !== 'object') return false;
+
+  // Per-scene hard override
+  if (scene.disableSpeech === true) return false;
+  if (scene.forceSpeech === true) return true;
+
+  const t = scene.type;
+
+  // ✅ Only these scene types show speech UI
+  switch (t) {
+    case "hangman":
+    case "interaction":
+    case "interaction-scramble":
+    case "interaction-fill-in-the-blank":
+    case "interaction-audio-mc":          // text choices / prompt audio
+    case "video-choice":
+    case "video-multi-question":
+    case "video-multi-audio-choice":
+    case "video-scramble":
+    case "video-fill-in-the-blank":
+    case "text":                          // text scenes with choices/navigation
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+function updateSpeechUIForScene(sceneOrId) {
+  // Make sure HUD exists (idempotent, safe to call a lot)
+  try { ensureSpeechUI(); } catch (_) {}
+
+  const scene = (typeof sceneOrId === 'string')
+    ? (window.scenes && window.scenes[sceneOrId])
+    : sceneOrId;
+
+  const shouldShow = wantsSpeechForScene(scene);
+
+  const hud      = document.getElementById('speech-hud');
+  const panel    = document.getElementById('speech-settings');
+  const testBtn  = document.getElementById('speech-test');
+  const testOut  = document.getElementById('speech-test-out');
+
+  [hud, panel, testBtn, testOut].forEach(el => {
+    if (!el) return;
+    if (shouldShow) {
+      el.style.display = '';
+      if (el.id === 'speech-settings') el.hidden = true; // panel closed by default
+    } else {
+      el.style.display = 'none';
+      if (el.id === 'speech-settings') el.hidden = true;
+    }
+  });
+}
+
+// --- Speech per-scene hard gate (uses scene.disableSpeech / scene.enableSpeech) ---
+
+function hardDisableSpeechForScene() {
+  try {
+    // Global flag other code can check
+    window.__SPEECH_ALLOWED__ = false;
+
+    // Hide HUD/panel/test if they exist
+    [
+      'speech-hud',
+      'speech-settings',
+      'speech-test',
+      'speech-test-out'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    // Remove any per-question mic / speak buttons
+    [
+      'mc-speak-btn',
+      'floating-mc-mic'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
+  } catch (e) {
+    console.warn('[Speech] hardDisableSpeechForScene failed', e);
+  }
+}
+
+function softEnableSpeechForScene() {
+  try {
+    window.__SPEECH_ALLOWED__ = true;
+    // Recreate HUD etc. if needed; no-op if already there
+    if (typeof ensureSpeechUI === 'function') {
+      ensureSpeechUI();
+    }
+  } catch (e) {
+    console.warn('[Speech] softEnableSpeechForScene failed', e);
+  }
+}
+
+
+
+// === Speak button injector hooked to loadScene (permanent) ===
+// === Speak button injector hooked to loadScene (with fallback if SpeechFeature/attachSpeechCheck missing) ===
+// === Speak button injector hooked to loadScene (single clean fallback, id-safe) ===
+// === Speak button injector hooked to loadScene (fuzzy ordered subsequence matcher) ===
+// === Speak button injector hooked to loadScene (aligns tiles to your speech) ===
+// === Speak button injector hooked to loadScene (aligns tiles to your speech; hardened) ===
+// === Speak button injector hooked to loadScene (robust align & debug) ===
+// === Speak button injector hooked to loadScene (chip→speech alignment) ===
+// === Speak button injector — phrase-aware alignment for scramble chips ===
+// === Speak button injector — phrase-aware + contraction-normalized + expected-order fallback ===
+// === Speak button injector — conservative auto-arrange with coverage gate ===
+// === Speak button injector — v5: strong gentle reordering + verbose logs ===
+// === Speak button injector — v6 (token-overlap matching + reliable reordering + clear logs) ===
+// === Speak button injector — v6.1 (exact-order on full match, simpler aggressive sort) ===
+// === Speak button injector — v6.2 (strict phrase match, move-only-what-you-said) ===
+// === Speak button injector — v6.3 (adaptive matching, fewer retries) ===
+/* =======================================================================
+   Speech v6.3 — MC-only hook (scramble code removed)
+   - Maps: interaction, multiple-choice, decision, interaction-audio-mc
+   - Injects #mc-speak-btn into #choices-container once buttons are visible
+   - Label picks (A/B/C, 1/2/3, number words incl. ES) + semantic scoring
+   - Busy state, duplicate guard, optional "M" keyboard shortcut
+   ======================================================================= */
+/* =======================================================================
+   Speech v6.3 — MC-only hook (robust)
+   - Detects MC scenes by exact keys OR regex (/mc|multiple|choice/i)
+   - Finds buttons beyond #choices-container (fallback scan)
+   - Waits with MutationObserver + visibility polling before injecting mic
+   ======================================================================= */
+/* =======================================================================
+   Speech v6.3 — MC-only hook (filtered for real choices)
+   ======================================================================= */
+/* =======================================================================
+   Speech v6.3 — MC-only hook (filtered + robust)  — CLEAN VERSION
+   ======================================================================= */
+/* =======================================================================
+   Speech v6.3 — MC-only hook (filtered + robust) — SYNC SCENE ID
+   ======================================================================= */
+(function hookSpeakBtnIntoLoadScene(){
+  if (window.__speakHookInstalled_v63) return;
+  window.__speakHookInstalled_v63 = true;
+
+  /* ---------------- global state (timeout guard) ---------------- */
+  let __commitTs = 0;
+  let __pendingTimeoutTimer = null;
+  const COMMIT_GRACE_MS = 1500;
+  window.__speechListening = false;
+  window.__speechChoiceCommitted = false;
+
+  function isTimeoutSceneId(targetId){
+    try {
+      const cur = window.currentSceneId && (window.scenes||{})[window.currentSceneId];
+      if (cur?.endings?.timeout && targetId === cur.endings.timeout) return true;
+    } catch {}
+    return /timeout/i.test(String(targetId||''));
+  }
+
+  /* ---------------- install wrapper (with timeout-guard) ---------------- */
+  function install(orig){
+    window.loadScene = function(id){
+      if (isTimeoutSceneId(id)) {
+        const now = Date.now();
+        const withinListening = !!window.__speechListening;
+        const sinceCommit = now - __commitTs;
+        const withinGrace = sinceCommit >= 0 && sinceCommit < COMMIT_GRACE_MS;
+
+        if (withinListening || withinGrace){
+          const delay = withinListening ? 300 : (COMMIT_GRACE_MS - sinceCommit);
+          clearTimeout(__pendingTimeoutTimer);
+          __pendingTimeoutTimer = setTimeout(()=>{
+            try { orig.call(window, id); } catch {}
+          }, Math.max(0, delay));
+          console.warn('[Speech][Guard] deferred timeout', {withinListening, withinGrace, delay});
+          return;
+        }
+      }
+
+      if (id) window.currentSceneId = id;
+      const r = orig.apply(this, arguments);
+      try { if (typeof ensureSpeechUI === 'function') ensureSpeechUI(); } catch(_) {}
+      setTimeout(() => { try { addSpeechForScene(id || window.currentSceneId); } catch(e){ console.warn('[Speech v6.3]', e); } }, 0);
+      return r;
+    };
+
+    console.log('[Speech v6.3] loadScene hook installed (global MC + free-text + timeout-guard)');
+    setTimeout(() => { try { if (window.currentSceneId) addSpeechForScene(window.currentSceneId); } catch {} }, 0);
+  }
+
+  if (typeof window.loadScene === 'function') install(window.loadScene);
+  else {
+    let tries = 0;
+    (function wait(){
+      if (typeof window.loadScene === 'function') return install(window.loadScene);
+      if (tries++ > 200) return;
+      setTimeout(wait, 30);
+    })();
+  }
+
+  /* ---------------- utils (GLOBAL) ---------------- */
+  const norm = s => String(s||'')
+    .toLowerCase()
+    .replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'")
+    .replace(/[^a-z0-9áéíóúüñçœæß\s'-]/gi,' ')
+    .replace(/\s+/g,' ').trim();
+
+  function isVisible(el){
+    return !!(el && el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden');
+  }
+
+  function getVisibleChoiceButtonsStrict(){
+    const cc = document.getElementById('choices-container');
+    const exclude = b =>
+      b.id === 'mc-speak-btn' ||
+      b.classList.contains('speech-btn') ||
+      /^speech-/.test(b.id || '') ||
+      !isVisible(b) ||
+      !(b.textContent?.trim() || b.getAttribute('aria-label'));
+    if (cc){
+      const btns = [...cc.querySelectorAll('button,[role="button"],a[role="button"],.choice,.option')].filter(b => !exclude(b));
+      if (btns.length) return { btns, container: cc };
+    }
+    const roots = [document.getElementById('interaction-area'), document.getElementById('scene'), document.getElementById('game'), document.body].filter(Boolean);
+    for (const root of roots){
+      const cands = [...root.querySelectorAll('button,[role="button"],a[role="button"],.choice,.option')].filter(b => !exclude(b));
+      if (cands.length) {
+        const parent = cands[0].closest('#choices-container, .choices, .options, .mc, [data-choices], [data-options]') || cands[0].parentElement || root;
+        return { btns: cands, container: parent };
+      }
+    }
+    return { btns: [], container: cc || document.body };
+  }
+
+  function whenButtonsVisible(cb, timeoutMs=8000){
+    const start = performance.now();
+    let done = false;
+    const tryFinish = () => {
+      const found = getVisibleChoiceButtonsStrict();
+      if (found.btns.length) { done = true; try { obs.disconnect(); } catch{} cb(found); }
+    };
+    const init = getVisibleChoiceButtonsStrict();
+    if (init.btns.length) return cb(init);
+    const obs = new MutationObserver(() => { if (!done) tryFinish(); });
+    obs.observe(document.body, { childList: true, subtree: true });
+    (function poll(){
+      if (done) return;
+      tryFinish();
+      if (done) return;
+      if (performance.now() - start > timeoutMs) { try { obs.disconnect(); } catch{} return; }
+      requestAnimationFrame(poll);
+    })();
+  }
+
+  /* ---------- UI lock helpers ---------- */
+  function ensureFreezeStyles(){
+    if (document.getElementById('speech-freeze-style')) return;
+    const css = `
+    #speech-lock-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.02);pointer-events:all}
+    #speech-lock-badge{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:2147483647;padding:8px 12px;border-radius:999px;background:rgba(0,0,0,.72);color:#fff;font:500 13px/1.2 system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+    .speech-locked [data-clickable],.speech-locked button,.speech-locked [role="button"],.speech-locked .choice,.speech-locked .option{cursor:not-allowed!important}`;
+    const tag = document.createElement('style');
+    tag.id = 'speech-freeze-style';
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }
+
+  let __speechLockedLocal = false;
+  let __lockKbHandler = null;
+
+  function lockInteractions(){
+    if (__speechLockedLocal) return;
+    ensureFreezeStyles();
+    __speechLockedLocal = true;
+    document.documentElement.classList.add('speech-locked');
+
+  let ov = document.getElementById('speech-lock-overlay');
+if (!ov){
+  ov = document.createElement('div');
+  ov.id = 'speech-lock-overlay';
+  // ⚠️ Do NOT set aria-hidden on a node that can hold focus; use inert instead.
+  ov.setAttribute('inert', '');  // prevents focus & pointer events for children
+  ov.tabIndex = -1;              // ensure it won't be focusable itself
+
+  ['click','mousedown','mouseup','pointerdown','pointerup','keydown'].forEach(ev=>{
+    ov.addEventListener(ev, e => { e.stopPropagation(); e.preventDefault(); }, true);
+  });
+
+  // full-screen cover
+  ov.style.position = 'fixed';
+  ov.style.inset = '0';
+  ov.style.zIndex = '2147483646';
+  ov.style.background = 'rgba(0,0,0,.02)';
+  ov.style.pointerEvents = 'all';
+
+  document.body.appendChild(ov);
+}
+
+
+    let badge = document.getElementById('speech-lock-badge');
+    if (!badge){
+      badge = document.createElement('div');
+      badge.id = 'speech-lock-badge';
+      badge.textContent = 'Listening… choices disabled';
+      document.body.appendChild(badge);
+    } else {
+      badge.style.display = 'block';
+    }
+
+    const btns = [...document.querySelectorAll('button,[role="button"],.choice,.option')];
+    btns.forEach(b=>{
+      if (b.id === 'mc-speak-btn' || b.classList.contains('speech-btn') || /^speech-/.test(b.id||'')) return;
+      if (!b.dataset.__speechWasDisabled) b.dataset.__speechWasDisabled = b.disabled ? '1' : '0';
+      b.disabled = true;
+      b.setAttribute('aria-disabled','true');
+    });
+
+    __lockKbHandler = (e)=>{
+      const k = (e.key||'').toLowerCase();
+      const block = new Set(['enter',' ']);
+      const digit = /^\d$/.test(k);
+      const letter = /^[a-j]$/.test(k);
+      if (block.has(k) || digit || letter){ e.stopPropagation(); e.preventDefault(); }
+    };
+    document.addEventListener('keydown', __lockKbHandler, true);
+  }
+
+  function unlockInteractions(){
+    try {
+      const ov = document.getElementById('speech-lock-overlay');
+      if (ov) ov.remove();
+    } catch(_) {}
+    if (!__speechLockedLocal) return;
+    __speechLockedLocal = false;
+    document.documentElement.classList.remove('speech-locked');
+   
+    const badge = document.getElementById('speech-lock-badge');
+    if (badge) badge.style.display = 'none';
+
+    const btns = [...document.querySelectorAll('button,[role="button"],.choice,.option')];
+    btns.forEach(b=>{
+      if (b.id === 'mc-speak-btn' || b.classList.contains('speech-btn') || /^speech-/.test(b.id||'')) return;
+      const was = b.dataset.__speechWasDisabled; delete b.dataset.__speechWasDisabled;
+      if (was === '0') { b.disabled = false; b.removeAttribute('aria-disabled'); }
+    });
+
+    if (__lockKbHandler){ document.removeEventListener('keydown', __lockKbHandler, true); __lockKbHandler = null; }
+  }
+
+  // --- Scene timer helpers (safe if SceneTimer is absent) ---
+  function pauseSceneTimer(){ try { window.SceneTimer?.pause(); } catch(_){} }
+  function resumeSceneTimer(){ try { if (!window.__speechChoiceCommitted) window.SceneTimer?.resume(); } catch(_){} }
+
+  // guard hooks the mic will call
+  function __speechGuard_onStart(){
+    window.__speechListening = true;
+    window.__speechChoiceCommitted = false;
+    pauseSceneTimer();
+    try { document.dispatchEvent(new Event('speech-start')); } catch(_){}
+  }
+  function __speechGuard_onFinish(committed){
+    window.__speechListening = false;
+    if (committed) {
+      window.__speechChoiceCommitted = true;
+      __commitTs = Date.now();
+    }
+    if (!committed) resumeSceneTimer();
+    try { document.dispatchEvent(new Event('speech-finish')); } catch(_){}
+  }
+  function __speechGuard_onCancel(){
+    window.__speechListening = false;
+    resumeSceneTimer();
+    try { document.dispatchEvent(new Event('speech-cancel')); } catch(_){}
+  }
+
+  // 🔔 NEW: emit when a speech-driven choice is actually committed
+  function __speechEmitCommit(){
+    try { document.dispatchEvent(new Event('speech-commit')); } catch(_) {}
+  }
+
+  // --- Student Mode detection ---
+  function isStudentMode(){
+    const chk = document.getElementById('speech-student-mode');
+    if (chk && chk.checked) return true;
+    return !!(window.SpeechFeature?.settings?.studentMode);
+  }
+
+  // --- Aliases & contractions ---
+  function applySpeechAliases(s){
+    const map = (window.SpeechFeature?.settings?.aliasMap) || {};
+    let out = String(s||'');
+    try {
+      for (const [from,to] of Object.entries(map)){
+        const re = new RegExp(`\\b${from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'gi');
+        out = out.replace(re, to);
+      }
+    } catch {}
+    return out;
+  }
+
+  function toks(s){ return String(s||'').toLowerCase().match(/[a-z0-9áéíóúüñçœæ'-]+/gi) || []; }
+
+  const STOP = new Set(['a','an','the','and','or','but','if','to','of','in','on','for','by','with','as','is','are','was','were','be','been','this','that','these','those','it','we','you','they','i','he','she','them','our','your','their','at','from','into','about','over','after','before','within','without','up','down','out','will','would','can','could','should','may','might','must','do','does','did','have','has','had','one','two','three','four','five','six','seven','eight','nine','ten']);
+
+  function autoKeywordHints(text, max=6){
+    const freq = new Map();
+    const words = toks(text);
+    for (const w0 of words){
+      if (STOP.has(w0)) continue;
+      if (w0.length < 3) continue;
+      const w = w0;
+      freq.set(w, (freq.get(w) || 0) + 1);
+    }
+    return [...freq.entries()].sort((a,b)=> b[1]-a[1] || a[0].length-b[0].length).slice(0, max).map(([w])=>w);
+  }
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  function computePickPolicy(opts){
+    const tol = typeof opts.tol === 'number' ? opts.tol : 0.80;
+    const t = clamp((tol - 0.65) / (0.92 - 0.65), 0, 1);
+    const timed   = !!opts.timed;
+    const student = !!opts.student;
+    const pron    = !!opts.pronunciationFocus;
+
+    let tokenW = pron ? lerp(0.55, 0.40, t) : lerp(0.70, 0.55, t);
+    let phonW  = 1 - tokenW;
+
+    let minScore = lerp(0.38, 0.58, t);
+    if (student) minScore -= 0.05;
+    if (timed)   minScore -= 0.03;
+    minScore = clamp(minScore, 0.30, 0.70);
+
+    let margin = lerp(0.04, 0.10, t);
+    if (timed) margin -= 0.02;
+    margin = clamp(margin, 0.02, 0.12);
+
+    let minPhoneme = pron ? lerp(0.30, 0.55, t) : lerp(0.22, 0.45, t);
+    if (student) minPhoneme -= 0.03;
+    minPhoneme = clamp(minPhoneme, 0.18, 0.60);
+
+    return { weights:{token:tokenW, phoneme:phonW}, minScore, margin, minPhoneme };
+  }
+
+  function estimateSpeechWindowFromChoices(choiceList){
+    if (!Array.isArray(choiceList) || !choiceList.length) return 9000;
+    const longestWords = choiceList.reduce((max, choice) => {
+      const raw = (choice && typeof choice.raw === 'string') ? choice.raw
+                : (choice && typeof choice.text === 'string') ? choice.text
+                : '';
+      if (!raw) return max;
+      const words = raw.trim().split(/\s+/).filter(Boolean).length;
+      return Math.max(max, words);
+    }, 0);
+    const baseWords = Math.max(12, longestWords);
+    const ms = Math.round(baseWords * 520 + 1800); // ≈115 wpm + buffer
+    return Math.max(9000, Math.min(22000, ms));
+  }
+
+  /* -------- Contraction support -------- */
+  function normalizeContractions(s){
+    let out = String(s||'')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .toLowerCase();
+    const map = [
+      [/i'm\b/g,'i am'], [/you're\b/g,'you are'], [/we're\b/g,'we are'], [/they're\b/g,'they are'],
+      [/he's\b/g,'he is'], [/she's\b/g,'she is'], [/it's\b/g,'it is'], [/that's\b/g,'that is'],
+      [/there's\b/g,'there is'], [/can't\b/g,'can not'], [/won't\b/g,'will not'], [/don't\b/g,'do not'],
+      [/doesn't\b/g,'does not'], [/didn't\b/g,'did not'], [/isn't\b/g,'is not'], [/aren't\b/g,'are not'],
+      [/wasn't\b/g,'was not'], [/weren't\b/g,'were not'], [/shouldn't\b/g,'should not'],
+      [/couldn't\b/g,'could not'], [/wouldn't\b/g,'would not'],
+      [/we'll\b/g,'we will'], [/you'll\b/g,'you will'], [/they'll\b/g,'they will'], [/i'll\b/g,'i will'],
+      [/we’ve\b/g,'we have'], [/weve\b/g,'we have'], [/we'd\b/g,'we would'], [/you'd\b/g,'you would']
+    ];
+    for (const [re, rep] of map) out = out.replace(re, rep);
+    return out;
+  }
+  const prepHeard  = s => normalizeContractions(applySpeechAliases(s));
+  const prepChoice = s => normalizeContractions(String(s||''));
+
+  /* ---------------- dispatcher ---------------- */
+    /* ---------------- dispatcher ---------------- */
+  function addSpeechForScene(sceneId){
+    const sc = (window.scenes || {})[sceneId];
+
+    // 🔒 Global gate: respect per-scene + helper
+    try {
+      if (!sc) return;
+
+      // Hard scene flags win first
+      if (sc.disableSpeech === true || sc.noSpeechUI === true) {
+        return;
+      }
+
+      // If central helper exists, trust it
+      if (typeof window.shouldSceneHaveSpeech === 'function') {
+        if (!window.shouldSceneHaveSpeech(sc)) {
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('[Speech v6.3] addSpeechForScene gate failed:', e);
+    }
+
+    const type = sc.type || '';
+    const mcTypes = new Set([
+      'interaction',
+      'multiple-choice',
+      'decision',
+      'interaction-audio-mc',
+      'video-choice',
+      'video-multi-question'
+    ]);
+
+    // Normal MC routes
+    if (mcTypes.has(type) || /mc|multiple|choice/i.test(type)) {
+      addSpeechForMultipleChoice(sceneId, sc);
+      return;
+    }
+
+    // Fallback: only if there are real choice buttons AND scene passed the gate
+    const probe = getVisibleChoiceButtonsStrict();
+    if (probe.btns.length) {
+      addSpeechForMultipleChoice(sceneId, sc);
+    }
+  }
+
+
+  // Robust prefix check
+  function strongPrefixPass(heard, targetRaw, isTimed){
+    const H = toks(prepHeard(heard));
+    const T = toks(prepChoice(targetRaw));
+    if (!H.length || !T.length) return false;
+
+    const PREF_MAX = 14;
+    const baseLen  = Math.max(8, Math.min(PREF_MAX, Math.ceil(T.length * 0.60)));
+
+    const stripSuffix = w => {
+      let x = w.replace(/['’]/g,''); x = x.replace(/(ing|ings)$/,'');
+      x = x.replace(/(ed|er|ers)$/,''); x = x.replace(/(es)$/,''); x = x.replace(/(s)$/,'');
+      return x;
+    };
+    function editDistance(a,b){
+      const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+      const dp=new Array(n+1); for(let j=0;j<=n;j++) dp[j]=j;
+      for(let i=1;i<=m;i++){
+        let prev=dp[0]; dp[0]=i;
+        for(let j=1;j<=n;j++){
+          const t=dp[j];
+          dp[j]=Math.min(dp[j]+1, dp[j-1]+1, prev+(a[i-1]===b[j-1]?0:1));
+          prev=t;
+        }
+      }
+      return dp[n];
+    }
+    function equalish(a,b){
+      if (a===b) return true;
+      const sa=stripSuffix(a), sb=stripSuffix(b);
+      if (sa===sb) return true;
+      const L=Math.max(sa.length,sb.length), k=(L>=6)?2:1;
+      if (editDistance(sa,sb)<=k) return true;
+      if (sa.length>=4 && sb.length>=4 && sa.slice(0,4)===sb.slice(0,4)) return true;
+      return false;
+    }
+
+    const FILLERS = new Set(['uh','um','erm','please','ok','okay','vale','eh']);
+    const Hf = H.filter(t => !FILLERS.has(t));
+    if (!Hf.length) return false;
+
+    const START_SKIP_MAX = 3;
+    let bestCoverage = 0, bestMatches = 0, bestN = 0;
+
+    for (let skip=0; skip<=START_SKIP_MAX; skip++){
+      const n = Math.min(PREF_MAX, Math.max(1, T.length - skip));
+      const P = T.slice(skip, skip + n);
+      if (!P.length) continue;
+
+      const m = Hf.length;
+      const dp = Array.from({length:m+1}, ()=> new Array(n+1).fill(0));
+      for (let i=1;i<=m;i++){
+        for (let j=1;j<=n;j++){
+          const match = equalish(Hf[i-1], P[j-1]) ? 1 : 0;
+          dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1], dp[i-1][j-1] + match);
+        }
+      }
+      const lcs = dp[m][n];
+      const cov = lcs / n;
+
+      if (cov > bestCoverage || (cov === bestCoverage && lcs > bestMatches)){
+        bestCoverage = cov; bestMatches = lcs; bestN = n;
+      }
+    }
+
+    const earlyEnough = Hf.length <= (bestN * 3);
+    const needMatches = isTimed ? 6 : 8;
+    const needCov     = isTimed ? 0.45 : 0.55;
+    return (bestMatches >= needMatches) && (bestCoverage >= needCov) && earlyEnough;
+  }
+
+  /* ---------------- MC injector (GLOBAL) ---------------- */
+  function addSpeechForMultipleChoice(sceneId, sc){
+    document.getElementById('mc-speak-btn')?.remove();
+
+    whenButtonsVisible(({ btns, container }) => {
+      if (!btns.length) return;
+      if (document.getElementById('mc-speak-btn')) return;
+
+      const mic = document.createElement('button');
+      mic.id = 'mc-speak-btn';
+      mic.textContent = '🎙️ Speak Choice';
+      mic.className = 'speech-btn';
+      mic.style.margin = '8px 0 0 0';
+      try { container.appendChild(mic); } catch { document.body.appendChild(mic); }
+
+      const labels = ['a','b','c','d','e','f','g','h','i','j'];
+
+      const choiceData = [...btns].map((b, i) => {
+        const raw = (b.textContent || b.getAttribute('aria-label') || '').trim();
+        const alts = (b.getAttribute('data-alt') || '').split(',').map(s => s.trim()).filter(Boolean);
+        let kw    = (b.getAttribute('data-kw') || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+        let kwNeg = (b.getAttribute('data-kw-neg') || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+        if (!kw.length) kw = autoKeywordHints(raw);
+        return {
+          el: b,
+          raw, rawPrep: prepChoice(raw), norm: norm(raw),
+          alts, normAlts: alts.map(norm),
+          kws: kw, kwsNeg: kwNeg,
+          index: i,
+          indexOriginal: Number.isFinite(Number(b.dataset?.originIndex))
+                          ? Number(b.dataset.originIndex)
+                          : i,
+          letter: labels[i] || String.fromCharCode(97 + i),
+          number: i + 1,
+          isRight: b.hasAttribute('data-right') || b.getAttribute('data-right') === '1'
+        };
+      });
+
+      try {
+        const inc = sc?.speechHints?.include || {};
+        const exc = sc?.speechHints?.exclude || {};
+        choiceData.forEach(cd => {
+          if (Array.isArray(inc[cd.index])) cd.kws.push(...inc[cd.index].map(s => String(s).toLowerCase()));
+          if (Array.isArray(exc[cd.index])) cd.kwsNeg.push(...exc[cd.index].map(s => String(s).toLowerCase()));
+        });
+      } catch(_) {}
+
+      // 🔧 UPDATED: emit speech-commit, unlock first, and force navigate if needed
+// --- replace your existing clickChoice with this version ---
+// --- helper: derive a fallback target from the current scene config ---
+function __fallbackNextForButton(el) {
+  try {
+    const curId = window.currentSceneId;
+    const sc = (window.scenes||{})[curId];
+    if (!sc) return "";
+
+    // 1) Index of this button (prefer stable originIndex)
+    const originIdx = Number.isFinite(+el.dataset?.originIndex)
+      ? +el.dataset.originIndex
+      : (function inferByText(){
+          if (!Array.isArray(sc.choices)) return NaN;
+          const txt = (el.textContent||"").trim().toLowerCase();
+          for (let i=0;i<sc.choices.length;i++){
+            const t = String(sc.choices[i]?.text||"").trim().toLowerCase();
+            if (t && t === txt) return i;
+          }
+          return NaN;
+        })();
+
+    // 2) Direct per-option target on the scene structure
+    //    (covers a bunch of schemas you might be using)
+    const direct = (Array.isArray(sc.choices) && sc.choices[originIdx] && typeof sc.choices[originIdx].next === 'string')
+      ? sc.choices[originIdx].next.trim()
+      : "";
+
+    if (direct) return direct;
+
+    // Arrays keyed by index
+    const arrKeys = ['choiceNext','nexts','routesArray'];
+    for (const k of arrKeys) {
+      const arr = Array.isArray(sc[k]) ? sc[k] : null;
+      const v = arr && arr[originIdx];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+
+    // Map objects keyed by index
+    const mapKeys = ['routes','nextMap','answerRoutes','answersNext'];
+    for (const k of mapKeys) {
+      const m = sc[k];
+      if (m && typeof m === 'object') {
+        const v = m[originIdx] ?? m[String(originIdx)];
+        if (typeof v === 'string' && v.trim()) return v.trim();
+      }
+    }
+
+    // Correct/wrong logic from scene fields
+    const ends = sc.endings || {};
+    const rightNext = ends.right || ends.correct || sc.nextCorrect || sc.correctNext || "";
+    const wrongNext = ends.wrong || ends.incorrect || sc.nextWrong || sc.wrongNext || "";
+
+    let isRight = false;
+
+    // (a) By numeric scene.correct
+    if (Number.isFinite(sc.correct)) isRight = (originIdx === Number(sc.correct));
+
+    // (b) By button tag
+    if (!isRight) {
+      isRight = el.hasAttribute('data-right') || el.getAttribute('data-right') === '1';
+    }
+
+    if (isRight && rightNext) return String(rightNext).trim();
+    if (!isRight && wrongNext) return String(wrongNext).trim();
+
+    // Last resort: global default next
+    if (typeof sc.next === 'string' && sc.next.trim()) return sc.next.trim();
+
+    return "";
+  } catch(e){
+    console.warn('[Speech][fallbackNextForButton] error', e);
+    return "";
+  }
+}
+
+function clickChoice(ch){
+  try {
+    window.__speechChoiceCommitted = true;
+
+    const el = ch.el;
+    const before = window.currentSceneId || '';
+    const wasDisabled = el.disabled;
+
+    // --- Robust NEXT resolver (multi-source + scene-aware fallback) ---
+    const scId = window.currentSceneId;
+    const sc   = (window.scenes || {})[scId] || {};
+    const sceneChoices = Array.isArray(sc.choices) ? sc.choices : [];
+
+    let target =
+      el.getAttribute('data-next') ||
+      (window.__choiceNextMap && window.__choiceNextMap.get(el)) ||
+      el.getAttribute('aria-next') ||
+      '';
+
+    // Fallback A: use originIndex → scene.choices[originIndex].next
+    if (!target) {
+      const oi = Number(el.dataset?.originIndex);
+      if (Number.isFinite(oi) && sceneChoices[oi] && sceneChoices[oi].next) {
+        target = sceneChoices[oi].next;
+      }
+    }
+
+    // Fallback B: text head match (prefix compare to be shuffle-proof)
+    if (!target && sceneChoices.length) {
+      const btnHead = (el.textContent || '').trim().slice(0, 120);
+      const norm = s => String(s||'')
+        .toLowerCase()
+        .replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'")
+        .replace(/\s+/g,' ')
+        .trim();
+      const BTN = norm(btnHead);
+      let hit = null;
+      for (const c of sceneChoices) {
+        const C = norm(String(c.text||'').slice(0, 120));
+        if (C && BTN && (BTN.startsWith(C) || C.startsWith(BTN) || BTN.includes(C) || C.includes(BTN))) {
+          hit = c; break;
+        }
+      }
+      if (hit && hit.next) target = hit.next;
+    }
+
+    if (!target) {
+      console.warn('[MC speech] no target to navigate to (no data-next / weakMap / aria-next / scene match).');
+    }
+
+    // Make sure it's clickable
+    if (wasDisabled) { el.disabled = false; el.removeAttribute('aria-disabled'); }
+
+    // Unlock before clicking so overlays don’t swallow it
+    try { unlockInteractions(); } catch(_) {}
+
+    // Visual cue
+    el.focus();
+    el.classList.add('choice-flash'); setTimeout(()=> el.classList.remove('choice-flash'), 300);
+
+    const proxy = el.__speechProxyClick;
+    try {
+      if (typeof proxy === 'function') {
+        proxy();
+        return;
+      }
+    } catch(_) {}
+    el.click();
+
+    // If scene didn’t change, force navigate with our resolved target
+    requestAnimationFrame(() => {
+      const unchanged = (window.currentSceneId === before);
+      if (unchanged && target) {
+        console.warn('[MC speech] click swallowed → forcing loadScene:', target, { before });
+        try { window.loadScene(target); } catch(e){ console.warn('[MC speech] force navigate failed', e); }
+      } else {
+        console.log('[MC speech] click succeeded', { before, after: window.currentSceneId });
+      }
+      if (wasDisabled) { el.disabled = true; el.setAttribute('aria-disabled','true'); }
+    });
+
+  } catch(e) {
+    console.warn('[MC speech] click failed', e);
+  }
+}
 
 
 
 
+
+
+
+      function leadInText(s, n = 11){
+        const txt = String(s||'').replace(/\s+/g,' ').trim();
+        const words = txt.split(' ');
+        const head = words.slice(0, n).join(' ');
+        return words.length > n ? head + '…' : head;
+      }
+
+      function scoreChoice(heard, choice, lang, weights, studentMode){
+        const H = prepHeard(heard);
+        let tokenCov = 0, phonCov = 0;
+        try {
+          if (window.SpeechFeature?.match) {
+            const base = SpeechFeature.match(H, choice.rawPrep, { allowOrderFlex: true })?.coverage || 0;
+            const altMax = Math.max(0, ...(choice.alts||[]).map(a => SpeechFeature.match(H, prepChoice(a), { allowOrderFlex:true })?.coverage || 0));
+            tokenCov = Math.max(base, altMax);
+          }
+        } catch{}
+        try {
+          if (typeof phonemeScore === 'function') {
+            const base = phonemeScore(H, choice.raw, lang)?.coverage || 0;
+            const altMax = Math.max(0, ...(choice.alts||[]).map(a => phonemeScore(H, a, lang)?.coverage || 0));
+            phonCov = Math.max(base, altMax);
+          }
+        } catch{}
+        let blended = (weights.token * tokenCov) + (weights.phoneme * phonCov);
+        const Hset = new Set(H.split(/\s+/).filter(Boolean));
+        const posHits = (choice.kws||[]).reduce((n,w)=> n + (Hset.has(w)?1:0), 0);
+        const negHits = (choice.kwsNeg||[]).reduce((n,w)=> n + (Hset.has(w)?1:0), 0);
+        if (studentMode){
+          blended += Math.min(0.25, posHits * 0.10);
+          const hToks = toks(H);
+          if (hToks.length <= 5 && posHits >= 1) blended += 0.08;
+        }
+        blended -= Math.min(0.24, negHits * 0.08);
+        blended = Math.max(0, Math.min(1, blended));
+        return { score: blended, posHits, negHits, phonCov };
+      }
+
+      function tryLabelPick(heard){
+        const hRaw = String(heard||'').toLowerCase();
+        const h = hRaw.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\s+/g,' ').trim();
+        const stripFillers = s => s.replace(/\b(uh|um|erm|please|por favor|ok|okay|vale|eh)\b/gi, '').replace(/\s+/g,' ').trim();
+        const hNoFill = stripFillers(h);
+        const letters = ['a','b','c','d','e','f','g','h','i','j'];
+        for (let i=0;i<letters.length;i++){
+          const l = letters[i];
+          const rePref = new RegExp(`\\b(?:option|choice|opcion|opción)\\s*${l}\\b`, 'i');
+          if (rePref.test(hNoFill)) return { index:i, letter:l };
+          if (hNoFill === l) return { index:i, letter:l };
+        }
+        const numberWords = { one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10, uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10 };
+        const prefNum = hNoFill.match(/\b(?:option|choice|opcion|opción)\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/i);
+        if (prefNum){
+          const tok = prefNum[1].toLowerCase();
+          const n = /^\d+$/.test(tok) ? Number(tok) : numberWords[tok];
+          if (Number.isInteger(n)) return { index:n-1, letter: letters[n-1] };
+        }
+        if (/^\d+$/.test(hNoFill)){
+          const n = Number(hNoFill); if (n>=1 && n<=10) return { index:n-1, letter: letters[n-1] };
+        } else if (numberWords[hNoFill]){
+          const n = numberWords[hNoFill]; return { index:n-1, letter: letters[n-1] };
+        }
+        return null;
+      }
+
+      function rankChoicesFor(utterance, lang, weights, student){
+        return choiceData.map(ch => ({ ch, ...scoreChoice(utterance, ch, lang, weights, student) })).sort((a,b)=> b.score - a.score);
+      }
+
+      function setMicBusy(busy){
+        mic.disabled = !!busy;
+        mic.dataset.listening = busy ? '1' : '0';
+        mic.textContent = busy ? '🎙️ Listening…' : '🎙️ Speak Choice';
+      }
+
+mic.addEventListener('click', () => {
+  // 0) Ensure Web Speech exists
+  const hasAPI = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  if (!hasAPI) { alert('Speech API not available in this browser.'); return; }
+
+  const student = isStudentMode();
+
+  // 1) Hard-enable SF (headless mode, no UI)
+  const SF = (window.SpeechFeature ||= { enabled:true, settings:{ lang:'en-US', tolerance:0.80 } });
+  SF.enabled = true; // force-on
+  if (!SF.settings.lang) SF.settings.lang = 'en-US';
+  if (typeof SF.settings.tolerance !== 'number') SF.settings.tolerance = 0.80;
+  const desiredWindow = estimateSpeechWindowFromChoices(choiceData);
+  const prevListen = Number(SF.settings.listenMs) || 0;
+  const minSceneWindow = student ? 9000 : 8000;
+  SF.settings.listenMs = Math.max(desiredWindow, prevListen, minSceneWindow);
+
+  // 2) Scene context
+  const tol = (SF.settings?.tolerance ?? 0.80);
+  const lang = SF.settings?.lang || 'en-US';
+  const isTimedScene = ((sc && typeof sc.timer === 'number' && sc.timer > 0) ||
+                        !!document.querySelector('#timer, #countdown, .timer, .countdown, [data-timer], .progress-bar, #progress-bar'));
+  const pron = !!(SF.settings && SF.settings.pronunciationFocus);
+
+  // 3) Busy/lock + single-shot guards + nav watcher so we never hang
+  lockInteractions();
+  setMicBusy(true);
+  __speechGuard_onStart();
+
+  let committed = false;
+  let finished  = false;
+
+  const beforeId = window.currentSceneId || '';
+  const NAV_POLL_MS = 60;
+
+  let navWatch = null;
+  let watchdog = null;
+
+  const clearGuards = () => {
+    try { if (watchdog) clearTimeout(watchdog); } catch {}
+    try { if (navWatch) clearInterval(navWatch); } catch {}
+    watchdog = null; navWatch = null;
+  };
+
+  const finish = (didCommit) => {
+    if (finished) return;
+    finished = true;
+    committed = !!didCommit;
+    clearGuards();
+    try { setMicBusy(false); } catch {}
+    try { unlockInteractions(); } catch {}
+    try { __speechGuard_onFinish(committed); } catch {}
+  };
+
+  // watch for navigation success (e.g., clickChoice advanced scene)
+  navWatch = setInterval(() => {
+    if (!finished && window.currentSceneId && window.currentSceneId !== beforeId) {
+      finish(true); // scene changed → consider committed
+    }
+  }, NAV_POLL_MS);
+
+  // cancel if engine never calls back
+  const WATCHDOG_MS = Math.max(6500, SF.settings.listenMs || 0);
+  watchdog = setTimeout(() => {
+    if (finished) return;
+    console.warn('[MC speech] watchdog timeout — cancelling listen');
+    const fb = document.getElementById('scramble-feedback') || container || document.body;
+    try { fb.style.display='block'; fb.style.color='#ffd166'; fb.textContent = 'No speech heard. Try again.'; } catch {}
+    finish(false);
+  }, WATCHDOG_MS);
+
+  // 4) Start recognition
+  try {
+    SF.start((heard, alts) => {
+      if (finished) return; // single-shot guard
+      clearGuards();
+
+      // === scoring policy ===
+      const policy = computePickPolicy({ tol, timed: isTimedScene, student, pronunciationFocus: pron });
+      const weights = policy.weights;
+      const minChoiceScore = (typeof SF.settings?.minScore === 'number') ? SF.settings.minScore : policy.minScore;
+      const wantMargin     = (typeof SF.settings?.strictPick === 'number') ? SF.settings.strictPick : policy.margin;
+      const minPhoneme     = (typeof SF.settings?.minPhoneme === 'number') ? SF.settings.minPhoneme : policy.minPhoneme;
+
+      const heardAliased = prepHeard(heard);
+      const altList = Array.isArray(alts) ? alts : [];
+      const candidates = [heardAliased, ...altList.map(prepHeard)];
+
+      // (A) labels A/B/1/2
+      const direct = tryLabelPick(heardAliased);
+      if (direct) {
+        const d = choiceData[direct.index];
+        if (d) { clickChoice(d); finish(true); return; }
+        finish(false); return;
+      }
+
+      // (B) unique prefix
+      try {
+        const prefixHits = choiceData.filter(ch => strongPrefixPass(heardAliased, ch.raw, isTimedScene));
+        if (prefixHits.length === 1) { clickChoice(prefixHits[0]); finish(true); return; }
+      } catch {}
+
+      // (C) best score + margin
+      const rank = (utt) => choiceData.map(ch => ({ ch, ...scoreChoice(utt, ch, lang, weights, student) }))
+                                      .sort((a,b)=> b.score - a.score);
+      const top = rank(heardAliased);
+      const top1 = top[0], top2 = top[1];
+      const margin = (top1?.score ?? 0) - (top2?.score ?? 0);
+      const havePhon = (typeof window.phonemeScore === 'function');
+      const phonOK = havePhon ? ((top1?.phonCov ?? 0) >= minPhoneme) : true;
+
+      if (top1 && top1.score >= minChoiceScore && margin >= wantMargin && phonOK) {
+        clickChoice(top1.ch);
+        finish(true);
+        return;
+      }
+
+      // Coach, don’t navigate
+      const fb = document.getElementById('scramble-feedback') || container || document.body;
+      try { fb.style.display='block'; fb.style.color='#ffd166'; fb.textContent = 'Not confident yet. Read the beginning of your chosen option clearly (8–12 words).'; }
+      catch {}
+      finish(false);
+    }, () => {
+      if (finished) return; // single-shot guard
+      clearGuards();
+      const fb = document.getElementById('scramble-feedback') || container || document.body;
+      try { fb.style.display='block'; fb.style.color='#ffd166'; fb.textContent = 'No speech heard. Try again.'; } catch {}
+      finish(false);
+    });
+  } catch (e) {
+    if (!finished) {
+      clearGuards();
+      console.warn('[MC speech] start() failed', e);
+      finish(false);
+    }
+  }
+});
+
+
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.key === 'm' || e.key === 'M') && mic && !mic.disabled && isVisible(mic)) mic.click();
+      }, { passive: true });
+    });
+  }
+
+  /* ---------------- free-text helpers (GLOBAL) ---------------- */
+  function evaluateFreeText(heard, rubric){
+    const lang = rubric?.lang || (window.SpeechFeature?.settings?.lang) || 'en-US';
+    const tol  = rubric?.tol  || (window.SpeechFeature?.settings?.tolerance) || 0.80;
+    const student = !!(window.SpeechFeature?.settings?.studentMode);
+
+    const H0 = prepHeard(heard);
+    const weights = student ? { token:0.60, phoneme:0.40 } : { token:0.75, phoneme:0.25 };
+
+    function cov(a,b){
+      let tokenCov=0, phonCov=0;
+      try { tokenCov = window.SpeechFeature?.match(a,b,{allowOrderFlex:true})?.coverage || 0; } catch{}
+      try { if (typeof phonemeScore==='function') phonemeScore(a,b,lang)?.coverage || 0; } catch{}
+      return weights.token*tokenCov + weights.phoneme*phonCov;
+    }
+
+    const models = [rubric?.model, ...(rubric?.alts||[])].filter(Boolean);
+    let best = 0;
+    for (const m of models) best = Math.max(best, cov(H0, m));
+
+    const heardTokens = new Set((toks(H0)||[]));
+    const incHits = (rubric?.include||[]).reduce((n,w)=> n + (heardTokens.has(String(w).toLowerCase())?1:0), 0);
+    const excHits = (rubric?.exclude||[]).reduce((n,w)=> n + (heardTokens.has(String(w).toLowerCase())?1:0), 0);
+    if (student) best += Math.min(0.25, incHits*0.10);
+    best -= Math.min(0.24, excHits*0.08);
+    best = Math.max(0, Math.min(1, best));
+
+    const pass = best >= Math.max(0.45, tol*0.55) - (student ? 0.06 : 0);
+    return { pass, score:best, incHits, excHits };
+  }
+
+  function attachFreeTextSpeechCheck(btn, rubric, onPass){
+    if (!btn) return;
+    btn.addEventListener('click', ()=>{
+      const SF = window.SpeechFeature||{};
+      if (!SF.enabled) return alert('Enable speech first (⚙️).');
+      lockInteractions(); __speechGuard_onStart();
+      SF.start(function(heard /*, alts*/){
+        const r = evaluateFreeText(heard, rubric||{});
+        __speechGuard_onFinish(r?.pass === true);
+        unlockInteractions();
+        if (r.pass) { try { onPass?.(r); } catch{} }
+        else {
+          const fb = document.getElementById('scramble-feedback') || document.body;
+          try { fb.style.display='block'; fb.style.color='#ffd166'; fb.textContent = `Not confident yet (score ${(r.score*100|0)}%). Try again with key details.`; }
+          catch { alert(`Not confident yet (score ${(r.score*100|0)}%). Try again with key details.`); }
+        }
+      }, ()=> { __speechGuard_onCancel(); unlockInteractions(); });
+    });
+  }
+
+  window.SpeechFreeText = { evaluateFreeText, attachFreeTextSpeechCheck };
+
+})(); // end hook
+
+// Global start (configurable)
+window.currentSceneId = window.currentSceneId || (window.START_SCENE_ID || 'scene1');
+window.loadScene(window.currentSceneId);
+
+// Student mode toggle wiring (settings panel)
+(function wireStudentModeToggle(){
+  function init(){
+    const el = document.getElementById('speech-student-mode');
+    if (!el) return false;
+    window.SpeechFeature = window.SpeechFeature || {};
+    SpeechFeature.settings = SpeechFeature.settings || {};
+    const saved = localStorage.getItem('speech.studentMode');
+    const initial = (saved === null) ? !!SpeechFeature.settings.studentMode : (saved === '1');
+    el.checked = initial;
+    SpeechFeature.settings.studentMode = el.checked;
+    el.addEventListener('change', () => {
+      SpeechFeature.settings.studentMode = el.checked;
+      localStorage.setItem('speech.studentMode', el.checked ? '1' : '0');
+      console.log('[Speech] Student mode →', el.checked ? 'ON' : 'OFF');
+    });
+    return true;
+  }
+  if (!init()){
+    let tries = 0;
+    const t = setInterval(() => { if (init() || ++tries > 60) clearInterval(t); }, 100);
+  }
+})();
+
+// Arm speech for MC choices with retries (no hook changes)
+window.__armSpeechForChoices = function __armSpeechForChoices(hostSel = '#choices-container') {
+  // Clean any stuck overlay/focus from prior scene
+  try {
+    const lock = document.getElementById('speech-lock-overlay');
+    if (lock) lock.remove();
+    window.__speechListening = false;
+    window.__speechChoiceCommitted = false;
+  } catch(_) {}
+
+  const MAX_TRIES = 5;
+  let tries = 0;
+
+  function attempt() {
+    const host = document.querySelector(hostSel);
+    const hasChoices = !!host && host.querySelector('.choice');
+    if (!hasChoices) {
+      if (tries++ < MAX_TRIES) return setTimeout(attempt, 60);
+      return; // give up quietly
+    }
+
+    try { updateSpeechUIForScene(firstSceneId); } catch(_) {}
+    try { 
+      if (typeof window.addSpeechForMultipleChoice === 'function') {
+        window.addSpeechForMultipleChoice();    // inject mic into #choices-container
+      }
+    } catch(_) {}
+
+    // if mic still missing, retry a few times
+    const mic = document.getElementById('mc-speak-btn') || document.querySelector('.speech-btn');
+    if (!mic && tries++ < MAX_TRIES) return setTimeout(attempt, 80);
+  }
+
+  // rAF twice to ensure layout committed, then start attempts
+  requestAnimationFrame(() => requestAnimationFrame(attempt));
+};
+
+// ==== SAFE SPEECH CHOICES ARMER (polymorphic arg + idempotent) ====
+(function(){
+  // If a stable version already exists, replace it to gain the polymorphic behavior
+  function armOnce(host){
+    try {
+      if (!host || !host.children || !host.children.length) return;
+      if (host.__speechArmed) return;            // idempotent per host
+      host.__speechArmed = true;
+
+      const hook = window.__armSpeechForChoicesLegacy || window.__armSpeechForChoicesRaw || window.__armSpeechForChoices;
+
+      if (typeof hook === 'function') {
+        // 1) Try passing the element (modern form)
+        try { hook(host); return; }
+        catch (e1) {
+          // 2) If their hook uses querySelector(sel), retry with a selector string
+          if (e1 && /querySelector/.test(String(e1.message||e1))) {
+            try { hook('#choices-container'); return; } catch(e2){}
+          }
+          // 3) Final fallback: do nothing silently (never throw)
+        }
+      }
+      // If no hook present, fail silently.
+    } catch(_) {}
+  }
+
+  function armWithRetries(host){
+    let tries = 0, max = 6;
+    function tick(){
+      if (!host || !document.body.contains(host)) return;
+      armOnce(host);
+      if (!host.__speechArmed && ++tries < max) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // public stable entry
+  function stableArm(host){
+    if (!host) return;
+    try {
+      document.dispatchEvent(new CustomEvent('choices-ready', {
+        detail:{ sceneId: window.currentSceneId || '', hostId: host.id || '' }
+      }));
+    } catch(_) {}
+    armWithRetries(host);
+  }
+  stableArm.__stable = true;
+
+  // Preserve any existing raw hook so we can call it
+  if (typeof window.__armSpeechForChoices === 'function' && !window.__armSpeechForChoices.__stable) {
+    window.__armSpeechForChoicesRaw = window.__armSpeechForChoices;
+  }
+  // Also store a legacy alias if one exists elsewhere
+  if (typeof window.__armSpeechForChoicesLegacy === 'undefined' && typeof window.__armSpeechForChoices === 'function') {
+    window.__armSpeechForChoicesLegacy = window.__armSpeechForChoices;
+  }
+
+  window.__armSpeechForChoices = stableArm;
+})();
+
+/* ===== Global Speech Button Guard (sticky + observer) ===== */
+/* ===== Global Speech Button Guard (sticky + observer + watchdog) ===== */
+(function installSpeechGuard(){
+  if (window.__speechGuardInstalled) return;
+  window.__speechGuardInstalled = true;
+
+  // --- helpers ----------------------------------------------------------
+  function getChoicesHost(){
+    // Canonical host used by loaders
+    var host = document.querySelector('#choices-container');
+    if (!host) host = document.querySelector('#vc-choices'); // fallback if you ever use it
+    if (!host) return null;
+    // Only consider it valid when real options exist
+    if (!host.querySelector('.choice')) return null;
+    return host;
+  }
+
+function ensureMic(host){
+  if (!host) return false;
+
+  // 🔒 Per-scene gate: respect disableSpeech / noSpeechUI / shouldSceneHaveSpeech
+  try {
+    const curId = window.currentSceneId;
+    const sc = (window.scenes || {})[curId] || null;
+
+    // If this scene explicitly disables speech UI → remove mic and bail
+    if (sc && (sc.disableSpeech === true || sc.noSpeechUI === true) && sc.forceSpeechUI !== true) {
+      host.querySelector('#mc-speak-btn')?.remove();
+      return false;
+    }
+
+    // If we have the global helper, let it decide
+    if (typeof window.shouldSceneHaveSpeech === 'function') {
+      if (!window.shouldSceneHaveSpeech(sc)) {
+        host.querySelector('#mc-speak-btn')?.remove();
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('[speech guard] ensureMic gate failed:', e);
+  }
+
+  // If we’re allowed and it already exists, we’re done
+  if (host.querySelector('#mc-speak-btn')) return true;
+
+  // ✅ Create the speak button (only on allowed scenes)
+  var btn = document.createElement('button');
+  btn.id = 'mc-speak-btn';
+  btn.className = 'speech-btn choice';
+  btn.type = 'button';
+  btn.textContent = '🎤 Speak answer';
+  btn.dataset.sticky = '1';
+
+  if (host.firstChild) host.insertBefore(btn, host.firstChild);
+  else host.appendChild(btn);
+
+  try {
+    if (typeof addSpeechForMultipleChoice === 'function') {
+      addSpeechForMultipleChoice();
+    }
+  } catch(e){
+    console.warn('[speech guard] addSpeechForMultipleChoice failed:', e);
+  }
+
+  return true;
+}
+
+
+  // --- observer (fires on DOM mutations) --------------------------------
+  var root = document.getElementById('game-container') || document.body;
+  var mo = new MutationObserver(function(){
+    var host = getChoicesHost();
+    if (host) ensureMic(host);
+  });
+  mo.observe(root, { childList: true, subtree: true });
+
+  // --- events (our own scene/choices signals) ----------------------------
+  document.addEventListener('choices-ready', function(){
+    var host = getChoicesHost();
+    if (host) ensureMic(host);
+  });
+
+  // Wrap loadScene to emit a scene-changed signal
+  (function wrapLoadSceneOnce(){
+    var orig = window.loadScene;
+    if (typeof orig !== 'function') return;
+    if (orig.__speechWrapped) return;
+    function wrapped(id){
+      var r = orig.apply(this, arguments);
+      try { document.dispatchEvent(new CustomEvent('scene-changed', { detail:{ id:id }})); } catch(_){}
+      return r;
+    }
+    wrapped.__speechWrapped = true;
+    window.loadScene = wrapped;
+  })();
+
+  // --- watchdog (periodic re-check for late wipes) -----------------------
+  var watchTimer = null;
+  var watchScene = null;
+
+  function stopWatch(){
+    if (watchTimer) { clearInterval(watchTimer); watchTimer = null; }
+    watchScene = null;
+  }
+
+  function startWatch(){
+    stopWatch();
+    watchScene = window.currentSceneId || null;
+    var ticks = 0, goodStreak = 0;
+
+    watchTimer = setInterval(function(){
+      // bail if scene changed
+      if (watchScene && window.currentSceneId && window.currentSceneId !== watchScene) {
+        stopWatch(); return;
+      }
+      var host = getChoicesHost();
+      if (!host) { goodStreak = 0; ticks++; if (ticks > 120) stopWatch(); return; } // ~30s max
+      var ok = ensureMic(host);
+      if (ok) { goodStreak++; } else { goodStreak = 0; }
+      ticks++;
+      // stop after we’ve seen the mic present a couple of consecutive checks
+      if (goodStreak >= 2 || ticks > 120) stopWatch();
+    }, 250);
+  }
+
+  document.addEventListener('scene-changed', function(){
+    startWatch();
+    try { unlockInteractions(); } catch(_) {}
+  });
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) startWatch();
+  });
+
+  // First pass (covers already-rendered scene on load)
+  setTimeout(function(){
+    var host = getChoicesHost();
+    if (host) ensureMic(host);
+    startWatch();
+  }, 0);
+})();
+
+/* ===== Floating Speech Mic (container-agnostic) ===== */
+(function installFloatingMCmic(){
+  if (window.__floatingMicInstalled) return;
+  window.__floatingMicInstalled = true;
+
+  // host slot (sticks to bottom of game container)
+  function getGame(){
+    return document.getElementById('game-container') || document.body;
+  }
+  function ensureSlot(){
+    var slot = document.getElementById('speech-mc-slot');
+    if (slot) return slot;
+    slot = document.createElement('div');
+    slot.id = 'speech-mc-slot';
+    slot.style.cssText = [
+      'position:sticky','bottom:0','margin-top:8px','padding:8px',
+      'display:none','justify-content:flex-end','gap:8px',
+      'background:transparent','z-index:50'
+    ].join(';');
+    getGame().appendChild(slot);
+    return slot;
+  }
+
+  function choicesPresent(){
+    // look anywhere under game container; don’t depend on a specific id
+    var root = getGame();
+    return !!root.querySelector('.choice');
+  }
+
+  function ensureMicVisible(){
+  var slot = ensureSlot();
+  var game = getGame();
+  if (!slot || !game) return;
+
+  // 🔒 Scene-level gate
+  try {
+    const scId = window.currentSceneId;
+    const sc = (window.scenes || {})[scId] || null;
+
+    // Respect global helper if present
+    if (typeof window.shouldSceneHaveSpeech === 'function') {
+      if (!window.shouldSceneHaveSpeech(sc)) {
+        slot.style.display = 'none';
+        slot.innerHTML = '';
+        return;
+      }
+    }
+
+    // Respect hard flags
+    if (sc && (sc.disableSpeech === true || sc.noSpeechUI === true) && sc.forceSpeechUI !== true) {
+      slot.style.display = 'none';
+      slot.innerHTML = '';
+      return;
+    }
+  } catch(e) {
+    console.warn('[floating mic] gate failed:', e);
+  }
+
+  // Only show if there are actual choices
+  var hasChoices = choicesPresent();
+  if (!hasChoices){
+    slot.style.display = 'none';
+    slot.innerHTML = '';
+    return;
+  }
+
+  // If already present, keep it
+  var btn = slot.querySelector('#floating-mc-mic');
+  if (!btn){
+    btn = document.createElement('button');
+    btn.id = 'floating-mc-mic';
+    btn.type = 'button';
+    btn.className = 'speech-btn';
+    btn.textContent = '🎤 Speak answer';
+    btn.style.cssText = [
+      'padding:10px 14px','border:none','border-radius:10px',
+      'font-weight:700','cursor:pointer',
+      'background:#00ffff','color:#000'
+    ].join(';');
+
+    // Delegate to native mic when clicked
+    btn.addEventListener('click', function(){
+      try { window.SceneTimer?.pause?.(); } catch(_){}
+      var nativeBtn =
+        document.getElementById('mc-speak-btn') ||
+        document.querySelector('#choices-container #mc-speak-btn');
+      if (nativeBtn) { nativeBtn.click(); return; }
+
+      try { typeof addSpeechForMultipleChoice === 'function' && addSpeechForMultipleChoice(); } catch(_){}
+
+      let tries = 0;
+      (function wait(){
+        var nb =
+          document.getElementById('mc-speak-btn') ||
+          document.querySelector('#choices-container #mc-speak-btn');
+        if (nb) { nb.click(); return; }
+        if (tries++ < 10) setTimeout(wait, 60);
+      })();
+    });
+
+    slot.appendChild(btn);
+  }
+
+  slot.style.display = 'flex';
+}
+
+
+  // Re-evaluate on scene changes and DOM churn
+  function emitCheckSoon(){
+    // a couple of delayed checks to catch late rewrites
+    setTimeout(ensureMicVisible, 0);
+    setTimeout(ensureMicVisible, 200);
+    setTimeout(ensureMicVisible, 500);
+  }
+
+  // Wrap loadScene to signal scene changes
+  (function wrapLoadSceneOnce(){
+    var orig = window.loadScene;
+    if (typeof orig !== 'function' || orig.__speechFloatingWrapped) return;
+    function wrapped(id){
+      var r = orig.apply(this, arguments);
+      try { document.dispatchEvent(new CustomEvent('scene-changed', { detail:{ id:id } })); } catch(_){}
+      emitCheckSoon();
+      return r;
+    }
+    wrapped.__speechFloatingWrapped = true;
+    window.loadScene = wrapped;
+  })();
+
+  // Listen for our existing “choices-ready” signals if any
+  document.addEventListener('choices-ready', emitCheckSoon);
+  document.addEventListener('scene-changed', emitCheckSoon);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) emitCheckSoon(); });
+  // Some loaders rebuild choices after feedback; watch for that too.
+document.addEventListener('choices-updated', emitCheckSoon);
+
+
+  // Mutation observer as a backstop
+var mo = null;
+function bindObserver() {
+  try { if (mo) mo.disconnect(); } catch(_){}
+  var root = getGame();
+  if (!root) return;
+  mo = new MutationObserver(function(){ emitCheckSoon(); });
+  mo.observe(root, { childList:true, subtree:true });
+}
+
+// (re)bind on install and on every scene change
+bindObserver();
+document.addEventListener('scene-changed', bindObserver);
+
+
+  // First pass
+  emitCheckSoon();
+})();
+
+/* === Floating MC Mic + Native Mic Ensurer (safe, idempotent) === */
+(function(){
+  if (window.__floatingMicInstalled) return;
+  window.__floatingMicInstalled = true;
+
+  // Debounce helper
+  function debounce(fn, ms){ let t; return function(){ clearTimeout(t); t=setTimeout(fn, ms); }; }
+
+  // Try to inject the native mic (the working one your hook normally adds)
+  function ensureNativeMic() {
+    var host = document.querySelector('#choices-container');
+    if (!host) return false;
+
+    // If it's already there, nothing to do.
+    if (document.getElementById('mc-speak-btn')) return true;
+
+    // Ask the hook to add it
+    try {
+      if (typeof addSpeechForMultipleChoice === 'function') {
+        addSpeechForMultipleChoice();
+      }
+    } catch(e) {
+      console.warn('[floating mic] addSpeechForMultipleChoice() threw:', e);
+    }
+
+    // Re-check shortly; if still missing, add a small shim that delegates to the hook
+    setTimeout(function(){
+      if (document.getElementById('mc-speak-btn')) return; // hook succeeded
+      var againHost = document.querySelector('#choices-container');
+      if (!againHost) return;
+
+      var shim = document.createElement('button');
+      shim.id = 'mc-speak-btn';              // same id so downstream logic works
+      shim.className = 'speech-btn';         // same class styling
+      shim.textContent = '🎤 Speak answer';
+      shim.style.cssText = 'margin-bottom:8px;';
+      shim.addEventListener('click', function(){
+        try { window.SceneTimer && window.SceneTimer.pause && window.SceneTimer.pause(); } catch(_){}
+        try {
+          if (typeof addSpeechForMultipleChoice === 'function') {
+            addSpeechForMultipleChoice();
+          }
+        } catch(e) {
+          console.warn('[floating mic shim] addSpeechForMultipleChoice() failed:', e);
+        }
+      });
+      againHost.prepend(shim);
+    }, 60);
+
+    return true;
+  }
+
+  // One floating mic that always appears when choices are visible
+  var btn = document.getElementById('floating-mc-mic');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'floating-mc-mic';
+    btn.type = 'button';
+    btn.textContent = '🎤 Speak answer';
+    btn.style.cssText = 'display:none;margin:10px 0;padding:10px 14px;border:none;border-radius:10px;background:#00ffff;color:#000;font-weight:700;cursor:pointer';
+    // Put it near the game container; we’ll move/show/hide via check()
+    var gc = document.getElementById('game-container') || document.body;
+    gc.prepend(btn);
+  }
+
+  // Clicking the floating mic should trigger the native mic
+  btn.addEventListener('click', function(){
+    // Prefer the native mic if present
+    var nativeBtn = document.getElementById('mc-speak-btn');
+    if (nativeBtn) {
+      nativeBtn.click();
+      return;
+    }
+    // Else try to create it, then click again
+    ensureNativeMic();
+    setTimeout(function(){
+      var nb = document.getElementById('mc-speak-btn');
+      if (nb) nb.click();
+    }, 120);
+  });
+
+  // Core re-check: show/hide floating, ensure native mic exists when choices exist
+  function check() {
+    var host = document.querySelector('#choices-container');
+    var hasChoices = !!(host && host.querySelectorAll('.choice').length);
+
+    // show/hide floating mic based on choices visibility
+    btn.style.display = hasChoices ? '' : 'none';
+
+    // if choices exist but no native mic, inject/ensure it
+    if (hasChoices && !document.getElementById('mc-speak-btn')) {
+      ensureNativeMic();
+    }
+  }
+  var checkSoon = debounce(check, 50);
+
+  // Observe changes inside the game container to react to scene/choice mounts
+  var gc = document.getElementById('game-container');
+  if (gc && window.MutationObserver) {
+    var mo = new MutationObserver(checkSoon);
+    mo.observe(gc, { childList: true, subtree: true });
+  }
+
+  // Also react when loaders emit this (some of your loaders already do)
+  document.addEventListener('choices-ready', checkSoon);
+
+  // Run now and once more shortly after mount
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ check(); setTimeout(check, 120); });
+  } else {
+    check(); setTimeout(check, 120);
+  }
+})();
+
+/* === Mic Guardian: re-ensures native mic on every scene (safe & idempotent) === */
+(function(){
+  if (window.__micGuardianInstalled) return;
+  window.__micGuardianInstalled = true;
+
+  // Minimal ensureNativeMic fallback (uses your hook if available, else shims a button)
+  window.ensureNativeMic = window.ensureNativeMic || function ensureNativeMic(){
+    var host = document.querySelector('#choices-container');
+    if (!host) return false;
+
+    // already there?
+    if (document.getElementById('mc-speak-btn')) return true;
+
+    // try real hook first
+    try {
+      if (typeof window.addSpeechForMultipleChoice === 'function') {
+        window.addSpeechForMultipleChoice();
+      }
+    } catch(e) { console.warn('[MicGuardian] addSpeechForMultipleChoice() threw:', e); }
+
+    // if still missing, add a shim button that delegates to the hook
+    setTimeout(function(){
+      if (document.getElementById('mc-speak-btn')) return; // hook succeeded
+      var h = document.querySelector('#choices-container'); if (!h) return;
+      var shim = document.createElement('button');
+      shim.id = 'mc-speak-btn';
+      shim.className = 'speech-btn';
+      shim.textContent = '🎤 Speak answer';
+      shim.dataset.sticky = "1"; // hint for any cleanups
+      shim.style.cssText = 'margin-bottom:8px;';
+      shim.addEventListener('click', function(){
+        try { window.SceneTimer && window.SceneTimer.pause && window.SceneTimer.pause(); } catch(_){}
+        try {
+          if (typeof window.addSpeechForMultipleChoice === 'function') {
+            window.addSpeechForMultipleChoice();
+          }
+        } catch(e) { console.warn('[MicGuardian] shim click failed:', e); }
+      });
+      h.prepend(shim);
+    }, 40);
+
+    return true;
+  };
+
+  function startMicGuardian(){
+    function startMicGuardian(){
+  stopMicGuardian();
+  var ticks = 0;
+  window.__micGuardianTimer = setInterval(function(){
+    ticks++;
+
+    var curId = window.currentSceneId;
+    var sc = (window.scenes || {})[curId] || null;
+
+    // 🔒 Respect scene gate
+    try {
+      if (typeof window.shouldSceneHaveSpeech === 'function') {
+        if (!window.shouldSceneHaveSpeech(sc)) {
+          if (document.getElementById('mc-speak-btn')) {
+            document.getElementById('mc-speak-btn').remove();
+          }
+          return;
+        }
+      }
+      if (sc && (sc.disableSpeech === true || sc.noSpeechUI === true) && sc.forceSpeechUI !== true) {
+        if (document.getElementById('mc-speak-btn')) {
+          document.getElementById('mc-speak-btn').remove();
+        }
+        return;
+      }
+    } catch(e){
+      console.warn('[MicGuardian] gate failed:', e);
+    }
+
+    var host = document.querySelector('#choices-container');
+    var hasChoices = !!(host && host.querySelectorAll('.choice').length);
+
+    if (hasChoices && !document.getElementById('mc-speak-btn')) {
+      try { window.ensureNativeMic && window.ensureNativeMic(); } catch(_){}
+    }
+
+    if (ticks > 100) stopMicGuardian();  // ~20s max
+  }, 200);
+}
+
+  }
+  function stopMicGuardian(){
+    if (window.__micGuardianTimer) {
+      clearInterval(window.__micGuardianTimer);
+      window.__micGuardianTimer = null;
+    }
+  }
+
+  // Wrap loadScene WITHOUT replacing earlier wrappers
+  (function wrapLoadScene(){
+    var prev = window.loadScene;
+    if (typeof prev !== 'function') {
+      // if loadScene isn’t ready yet, try again soon
+      var tries = 0;
+      (function wait(){
+        if (typeof window.loadScene === 'function') { wrapLoadScene(); return; }
+        if (tries++ > 200) return;
+        setTimeout(wait, 30);
+      })();
+      return;
+    }
+    window.loadScene = function(id){
+      var r = prev.apply(this, arguments);
+      try { startMicGuardian(); } catch(_){}
+      return r;
+    };
+  })();
+
+  // Also react when loaders announce choices are ready
+  document.addEventListener('choices-ready', function(){
+    try { startMicGuardian(); } catch(_){}
+  });
+
+  // One initial kick on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ try { startMicGuardian(); } catch(_){ } });
+  } else {
+    try { startMicGuardian(); } catch(_){}
+  }
+})();
+
+// === Speech allow-list helper ===
+function shouldSceneHaveSpeech(sc) {
+  if (!sc || typeof sc !== 'object') return false;
+
+  // Manual overrides:
+  if (sc.noSpeechUI === true)    return false;
+  if (sc.forceSpeechUI === true) return true;
+
+  const t = sc.type || 'text';
+
+  const hasTextChoices =
+    Array.isArray(sc.choices) &&
+    sc.choices.some(c => c && typeof c.text === 'string' && c.text.trim().length);
+
+  // interaction-audio-mc: only enable speech if options are textual, not pure audio files
+  const isIAMC_TextOptions = (() => {
+    if (t !== 'interaction-audio-mc') return false;
+    const opts = Array.isArray(sc.options) ? sc.options : [];
+    if (!opts.length) return false;
+
+    const isAudioFile = v =>
+      typeof v === 'string' && /\.(mp3|wav|ogg|m4a)$/i.test(v);
+
+    const isTextOption =
+      v =>
+        (typeof v === 'string' && !isAudioFile(v)) ||
+        (v && typeof v === 'object' && typeof v.text === 'string');
+
+    return opts.some(isTextOption);
+  })();
+
+  switch (t) {
+    case 'hangman':
+      return true;
+
+    case 'interaction-audio-mc':
+      // Only those with text options get speech
+      return isIAMC_TextOptions;
+
+    // Video challenges or text scenes with TEXT choices:
+    case 'video-choice':
+    case 'video-multi-question':
+    case 'video-multi-audio-choice':
+    case 'video-scramble':
+    case 'video-fill-in-the-blank':
+    case 'text':
+      return hasTextChoices;
+
+    default:
+      // Buckets, survivor, pure audio MC, email, dashboards, etc → no speech
+      return false;
+  }
+}
+
+function updateSpeechUIForScene(sceneOrId) {
+  const sc = (typeof sceneOrId === 'string')
+    ? (window.scenes || {})[sceneOrId]
+    : sceneOrId;
+
+  const need = shouldSceneHaveSpeech(sc);
+
+  if (!need) {
+    const hud  = document.getElementById('speech-hud');
+    const pnl  = document.getElementById('speech-settings');
+    const test = document.getElementById('speech-test');
+    const out  = document.getElementById('speech-test-out');
+
+    if (hud)  hud.style.display  = 'none';
+    if (pnl)  pnl.style.display  = 'none';
+    if (test) test.style.display = 'none';
+    if (out)  out.style.display  = 'none';
+
+    return;
+  }
+
+  // Scene DOES want speech → ensure UI exists + show it
+  try { ensureSpeechUI(); } catch (e) {
+    console.warn('[SpeechUI] ensureSpeechUI failed:', e);
+  }
+
+  const hud  = document.getElementById('speech-hud');
+  const pnl  = document.getElementById('speech-settings');
+  const test = document.getElementById('speech-test');
+  const out  = document.getElementById('speech-test-out');
+
+  if (hud)  hud.style.display  = '';
+  if (pnl)  pnl.style.display  = '';
+  if (test) test.style.display = '';
+  if (out)  out.style.display  = 'block';
+}
+
+window.shouldSceneHaveSpeech  = window.shouldSceneHaveSpeech  || shouldSceneHaveSpeech;
+window.updateSpeechUIForScene = window.updateSpeechUIForScene || updateSpeechUIForScene;

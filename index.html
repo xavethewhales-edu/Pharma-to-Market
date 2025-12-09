@@ -74,9 +74,6 @@
   </style>
 </head>
 
-<img id="brandLogo" src="images/corporate-logo.png" alt="Company logo">
-
-
 <body>
   <!-- Homepage Overlay -->
   <div id="overlay-content">
@@ -95,7 +92,7 @@
   <div id="game-container" style="display: none;">
     <div id="scene-image"></div>
     <div id="scene-text"></div>
-    <div id="challenge-info" style="margin-bottom: 20px; font-family: monospace; background: #111; color: rgb(189, 208, 208); padding: 10px; border-radius: 5px;"></div>
+    <div id="challenge-info" style="margin-bottom: 20px; font-family: monospace; background: #111; color: #0ff; padding: 10px; border-radius: 5px;"></div>
 
     <div id="sentence-scramble" style="display:none;"></div>
     <div id="scramble-feedback" style="display:none;"></div>
@@ -105,9 +102,63 @@
     <div id="scene-container"></div>
     <div id="email-challenge-container"></div>
 
-    <div id="brand-badge" title="Academy">
-  <img id="brand-logo" src="images/corporate-logo.png" alt="Academy logo" />
+    <!-- Speech Controls (HUD) -->
+<div id="speech-hud" class="speech-hud" aria-live="polite">
+  <button id="speech-toggle" class="speech-btn" title="Toggle Speech">🎤 Off</button>
+  <button id="speech-settings-btn" class="speech-btn" title="Speech Settings">⚙️</button>
+  <span id="speech-status" class="speech-chip" hidden>Listening…</span>
+  <span id="speech-transcript" class="speech-chip" hidden></span>
 </div>
+
+<!-- Slide-over Settings -->
+<div id="speech-settings" class="speech-panel" hidden>
+  <div class="speech-panel-inner">
+    <h3>Speech Settings</h3>
+
+    <div class="row">
+      <label>Enable Speech</label>
+      <label class="switch">
+        <input id="speech-enabled-checkbox" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <label for="speech-lang">Language</label>
+      <select id="speech-lang">
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="es-ES">Español (ES)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="speech-tolerance">Tolerance: <span id="speech-tolerance-value">0.80</span></label>
+      <input id="speech-tolerance" type="range" min="0.50" max="0.98" step="0.01" value="0.80">
+    </div>
+
+    <div class="row presets">
+      <button data-preset="strict" class="preset">Strict (0.92)</button>
+      <button data-preset="normal" class="preset">Normal (0.80)</button>
+      <button data-preset="lenient" class="preset">Lenient (0.65)</button>
+    </div>
+
+    <div class="row">
+      <button id="speech-close" class="speech-btn">Close</button>
+    </div>
+  </div>
+</div>
+<!-- Student Mode toggle -->
+<div class="speech-row" style="margin-top:8px">
+  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+    <input id="speech-student-mode" type="checkbox">
+    <span>Student mode (accent-friendly)</span>
+  </label>
+  <div style="font-size:.85rem;opacity:.8;margin-left:1.6rem">
+    Softer matching with common ASR fixes and keyword boosts.
+  </div>
+</div>
+
 
 
     <!-- ... -->
@@ -115,7 +166,11 @@
 
   <!-- Sortable.js and Game Script -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+
   <script src="script.js?v=scorm-fix5"></script>
+
+
 
   <script>
   /* Asset path helper: strips a leading "/" to keep relative URLs valid on GitHub Pages */
@@ -365,8 +420,6 @@ function getHomeEl() {
   };
 })();
 
-
-
 /* Brand signature (console + DOM comment) */
 (function(){
   const brand = "xavethewhales-games";
@@ -377,8 +430,6 @@ function getHomeEl() {
     document.body.appendChild(document.createComment(" Built by "+brand+" · © "+year+" "));
   } catch(_) {}
 })();
-
-
 
   
 
